@@ -206,19 +206,78 @@ function SeatsFunction()
 
    end
 end
-loadstring(game:HttpGet("https://raw.githubusercontent.com/vinhuchi/BloxFruit/main/Functions.lua"))()
+
+function Alive()
+   if LP and Char then
+      if Humanoid and HumanoidRootPart then
+         if Humanoid.Health > 0 then
+            return true
+         end 
+      end
+   end
+   return false
+end
+function EnterCode(Code)
+   game:GetService("ReplicatedStorage").Remotes.Redeem:InvokeServer(Code)
+end
+
+function Click()
+   pcall(function()
+      --ClickMod.activeController:attack()
+      VirtualUser:CaptureController()
+      VirtualUser:ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+   end)
+end
+function Equip(Tool)
+   pcall(function()
+      spawn(function()
+         local ToolEquip =  game.Players.LocalPlayer.Backpack:FindFirstChild(Tool)
+         if Humanoid then
+            Humanoid:EquipTool(ToolEquip)
+         end
+      end)
+   end)
+end
+
+
+
+function FastAttack()
+   pcall(function()
+      if getgenv().FastAttack then
+         ClickMod.activeController.attacking = false 
+         ClickMod.activeController.active = false
+         ClickMod.activeController.timeToNextAttack = 0
+         ClickMod.activeController.increment = 5
+     end
+   end)
+end
+getgenv().HitBox  = true
+function HitBoxPlr()
+   pcall(function()
+      if getgenv().HitBox then
+         if ClickMod.activeController.hitboxMagnitude ~= 60 then
+            ClickMod.activeController.hitboxMagnitude = 60 
+         end
+      end
+   end)
+end
+--Simulation
+function Simulation()
+   if setsimulationradius then
+      sethiddenproperty(LP, "SimulationRadius", 10000)
+   end
+   if setsimulationradius then
+      sethiddenproperty(LP, "MaxSimulationRadius", math.huge)
+   end
+   if setsimulationradius then
+      sethiddenproperty(LP, "SimulationRadius", math.huge)
+   end
+end
+--KillAura
 function KillAuraF()
    for i,v in pairs(game.Workspace.Enemies:GetChildren()) do
       if v.Parent and v:FindFirstChild("LowerTorso") and v:FindFirstChild("Head") and v:FindFirstChild("UpperTorso") and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 then
-         if setsimulationradius then
-            sethiddenproperty(LP, "SimulationRadius", 10000)
-         end
-         if setsimulationradius then
-            sethiddenproperty(LP, "MaxSimulationRadius", math.huge)
-         end
-         if setsimulationradius then
-            sethiddenproperty(LP, "SimulationRadius", math.huge)
-         end
+         Simulation()
          pcall(function()
             if (v.HumanoidRootPart.Position - HumanoidRootPart.Position).magnitude < 1000 then
               v:FindFirstChild("LowerTorso"):Destroy()
@@ -233,6 +292,26 @@ function KillAuraF()
       end
    end   
 end
+
+
+local function refreshPlayers()
+  table.clear(PlayerTable)
+  for i,v in pairs(game.Players:GetChildren()) do
+      if not table.find(PlayerTable, v.Name) then
+          table.insert(PlayerTable, v.Name)
+     
+      end
+  end
+end
+local function refreshBosses()
+   table.clear(BossesTable)
+   for i,v in pairs(game.Workspace.Enemies:GetChildren()) do
+      if string.find(v.Name, "Boss") then
+         table.insert(BossesTable, v.Name)
+      end
+   end
+ end
+
 function CheckQuestBoss()
    if FirstSea then
       if getgenv().ChosenBoss == "Saber Expert [Lv. 200] [Boss]" then
@@ -361,14 +440,37 @@ function CheckQuestBoss()
          QuestNameBoss = "DeepForestIsland"
          LvQuestBoss = 3
          QuestCFrameBoss = CFrame.new(-13231.1602, 333.744446, -7624.40723)
-      elseif getgenv().ChosenBoss == "Cake Queen [Lv. 2175] [Boss]" then
-         BossName = "Cake Queen [Lv. 2175] [Boss]"
+      elseif getgenv().ChosenBoss == "Cake Queen" then
+         BossName = "Cake Queen"
          QuestNameBoss = "IceCreamIslandQuest"
          LvQuestBoss = 3
          QuestCFrameBoss = CFrame.new(-821.71612548828, 65.819519042969, -10965.169921875)
       end
 	end 
 end
+
+function refreshWeapon1()
+
+  table.clear(PLrWeapons)
+  for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do  
+     if not table.find(PLrWeapons, v.name) then
+        if v:IsA("Tool") then
+           table.insert(PLrWeapons ,v.Name)
+        end
+     end
+ end
+
+  for i,v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do  
+     if not table.find(PLrWeapons, v.name) then
+        if v:IsA("Tool") then
+           table.insert(PLrWeapons ,v.Name)
+        end
+     end
+  end
+
+end
+loadstring(game:HttpGet("https://raw.githubusercontent.com/vinhuchi/BloxFruit/main/Functions.lua"))()
+
 --Do Functions
 CamMod:Stop()
 LoadSetting()
