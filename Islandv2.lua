@@ -448,7 +448,119 @@ function CheckQuestBoss()
       end
 	end 
 end
-
+function BringMob()
+   if getgenv().AutoFarmBring and DoMagnet then
+      for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+         if v.Parent and v:FindFirstChild("HumanoidRootPart") ~= nil and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0  and not Tweening  then
+            if v.Parent and Alive() and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and not Tweening and (v.HumanoidRootPart.Position-HumanoidRootPart.Position).magnitude <=  350 and not Tweening then 
+               if v.Name == NameMob or (string.find(v.Name,CurrentMobName) and string.find(v.Name,HighestLvToFarm) ) or string.find(v.Name,SpecialMob) and not string.find(v.name,"Boss") then
+                  Simulation()
+                  HitBoxPlr()
+                  v.Humanoid.WalkSpeed = 0
+                  v.HumanoidRootPart.Transparency = 1
+                  v.HumanoidRootPart.CanCollide = false
+                  v.HumanoidRootPart.Size = Vector3.new(10, 2, 10)
+                  if BringCFrame~= nil and BringPos ~= nil  and  (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 300 then
+                     Simulation()
+                     v.HumanoidRootPart.CFrame = BringCFrame
+                     v.HumanoidRootPart.Position = BringPos
+                  end
+               end
+            end
+         end
+      end
+   end
+end
+function BringMobBone()
+   if getgenv().AutoFarmBring and DoMagnet then
+       if ThirdSea then
+           for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+               if v.Parent and v:FindFirstChild("HumanoidRootPart") ~= nil and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0  and not Tweening then
+                   if  v.Parent and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").Health > 0 and game.Players.LocalPlayer.Character and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and not Tweening and (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <=  2500 then -- and string.find(v.Name,HighestLvToFarm) and not BringBone  
+                       Simulation()
+                       --Spawn(function()
+                         --if getgenv().AutoFarmBone then
+                             --for i2,v2 in pairs(v:GetChildren()) do
+                                --if v2:IsA("BasePart") or v2.ClassName == "MeshPart" or v2.Name == "Head" and getgenv().AutoFarmBone then
+                                   --v2.Transparency = 0.9
+                               -- elseif v2.ClassName == "Accessory"  and getgenv().AutoFarmBone then
+                                   --v2.Handle.Transparency = 0.9
+                               -- end
+                            -- end
+                          --end
+                      --end)
+                       --v.Humanoid.Sit = true
+                       --if v.Parent ~= nil  then
+                          --for _, child in pairs(v:GetDescendants()) do
+                             --if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
+                                --child.CanCollide = false
+                             --end
+                          --end
+                       --end
+                       --v.Humanoid.PlatformStand = true
+                       v.Humanoid.WalkSpeed = 1
+                       v.HumanoidRootPart.Transparency = 1
+                       --v.HumanoidRootPart.CanCollide = false
+                       --v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                       if BringCFrame~= nil and BringPos ~= nil  and  (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 300 then
+                          Simulation()
+                          v.HumanoidRootPart.CFrame = BringCFrame
+                          v.HumanoidRootPart.Position = BringPos
+                       else 
+                         -- BringCFrame = v.HumanoidRootPart.CFrame
+                         -- BringPos = v.HumanoidRootPart.Position
+                       end
+                   end
+               end
+           end
+       end
+   end
+end
+function BringMobEctoplasm()
+  if getgenv().AutoFarmBring and DoMagnet then
+      if SecondSea then
+          for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+              if v.Parent and v:FindFirstChild("HumanoidRootPart") ~= nil and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0  and not Tweening then
+                  if  v.Parent and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").Health > 0 and game.Players.LocalPlayer.Character and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and not Tweening and (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <=  2500 then -- and string.find(v.Name,HighestLvToFarm) and not BringBone  
+                      Simulation()
+                      --Spawn(function()
+                        --if getgenv().AutoFarmBone then
+                            --for i2,v2 in pairs(v:GetChildren()) do
+                               --if v2:IsA("BasePart") or v2.ClassName == "MeshPart" or v2.Name == "Head" and getgenv().AutoFarmBone then
+                                  --v2.Transparency = 0.9
+                              -- elseif v2.ClassName == "Accessory"  and getgenv().AutoFarmBone then
+                                  --v2.Handle.Transparency = 0.9
+                              -- end
+                           -- end
+                         --end
+                     --end)
+                      --v.Humanoid.Sit = true
+                      --if v.Parent ~= nil  then
+                         --for _, child in pairs(v:GetDescendants()) do
+                            --if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
+                               --child.CanCollide = false
+                            --end
+                         --end
+                      --end
+                      --v.Humanoid.PlatformStand = true
+                      v.Humanoid.WalkSpeed = 1
+                      v.HumanoidRootPart.Transparency = 1
+                      --v.HumanoidRootPart.CanCollide = false
+                      --v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                      if BringCFrame~= nil and BringPos ~= nil  and  (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 300 then
+                         Simulation()
+                         v.HumanoidRootPart.CFrame = BringCFrame
+                         v.HumanoidRootPart.Position = BringPos
+                      else 
+                        -- BringCFrame = v.HumanoidRootPart.CFrame
+                        -- BringPos = v.HumanoidRootPart.Position
+                      end
+                  end
+              end
+          end
+      end
+  end
+end
 function refreshWeapon1()
 
   table.clear(PLrWeapons)
@@ -821,8 +933,7 @@ AutoFarm:addToggle("Auto Farm Fruit Mastery(Current Support Sea 2,3)",getgenv().
          if Alive() then
             for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                if string.find(v.Name,HighestLvToFarm) and not string.find(v.Name,"Boss") then
-                  Equip(Weapon)
-                  HitBoxPlr()
+
                   getgenv().SilentAimMob = true
                   local MobHumanoid = v:FindFirstChild("Humanoid")
                   local MobHRP = v:FindFirstChild("HumanoidRootPart")
@@ -846,6 +957,8 @@ AutoFarm:addToggle("Auto Farm Fruit Mastery(Current Support Sea 2,3)",getgenv().
                         BringPos = v.HumanoidRootPart.Position
                      end
                   end
+                  Equip(Weapon)
+                  HitBoxPlr()
                   repeat game:GetService("RunService").RenderStepped:wait(0.1)
                      TweenFloat()
                      Clicking = true
@@ -862,10 +975,8 @@ AutoFarm:addToggle("Auto Farm Fruit Mastery(Current Support Sea 2,3)",getgenv().
                         if MobHumanoid.Health > 0 then
                            if MobHumanoid.Health > (MobHumanoid.MaxHealth*getgenv().HealthMastery)/100 then
                               Click()
-                              HitBoxPlr()
                               if HumanoidRootPart.Position.y >= v.HumanoidRootPart.Position.y then
                                  if v.HumanoidRootPart.Position.Y - OldY >= 0 then
-                                    TweenFloat()
                                     spawn(function()
                                        wait()
                                        if getgenv().AutoFarmFruitMastery then
