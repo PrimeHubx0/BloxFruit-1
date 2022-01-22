@@ -419,6 +419,38 @@ elseif ThirdSea then
 elseif FirstSea then
    MaxLevelSea = 675
 end
+local mt = getrawmetatable(game)
+local oldindex = mt.__index
+setreadonly(mt, false)
+mt.__index = newcclosure(function(t, k)
+   if t:IsA("Mouse") and (k == "Hit") then
+     if getgenv().SilentAimPlr then 
+        if plr ~= nil and plr ~= "" then
+           if plr and plr:FindFirstChild("HumanoidRootPart") and plr:FindFirstChild("Humanoid") and plr:FindFirstChild("Humanoid").Health > 0 and getgenv().SilentAimPlr then
+              return (k == "Hit" and plr.HumanoidRootPart.CFrame or plr.HumanoidRootPart)
+           end
+        end
+     end
+   end
+   return oldindex(t, k)
+end)
+setreadonly(mt, true)
+local mt = getrawmetatable(game)
+local oldindex = mt.__index
+setreadonly(mt, false)
+mt.__index = newcclosure(function(t, k)
+    if t:IsA("Mouse") and (k == "Hit" ) then
+      if getgenv().SilentAimMob then 
+         if MobSilent ~= nil and MobSilent ~= "" then
+            if MobSilent and MobSilent:FindFirstChild("HumanoidRootPart") and MobSilent:FindFirstChild("Humanoid") and MobSilent:FindFirstChild("Humanoid").Health > 0 then
+               return (k == "Hit" and MobSilent.HumanoidRootPart.CFrame or MobSilent.HumanoidRootPart)
+            end
+         end
+      end
+    end
+    return oldindex(t, k)
+end)
+setreadonly(mt, true)
 --Get Boss
 for i,v in pairs(require(game:GetService("ReplicatedStorage").Quests)) do
    local PlrLevel = game.Players.localPlayer.Data.Level.Value
