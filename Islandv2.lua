@@ -175,7 +175,7 @@ getgenv().Setting = {
 --Define Functions
 function SeatsFunction()
    
-   --[[for i,v in pairs(game:GetService("Workspace").Boats:GetDescendants()) do
+   for i,v in pairs(game:GetService("Workspace").Boats:GetDescendants()) do
       if v:IsA("Seat") then
          v.Disabled = not v.Disabled
       end
@@ -204,7 +204,7 @@ function SeatsFunction()
          end
       end
 
-   end]]
+   end
 end
 loadstring(game:HttpGet("https://raw.githubusercontent.com/vinhuchi/BloxFruit/main/Functions.lua"))()
 function KillAuraF()
