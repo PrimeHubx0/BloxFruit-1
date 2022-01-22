@@ -361,8 +361,8 @@ function CheckQuestBoss()
          QuestNameBoss = "DeepForestIsland"
          LvQuestBoss = 3
          QuestCFrameBoss = CFrame.new(-13231.1602, 333.744446, -7624.40723)
-      elseif getgenv().ChosenBoss == "Cake Queen" then
-         BossName = "Cake Queen"
+      elseif getgenv().ChosenBoss == "Cake Queen [Lv. 2175] [Boss]" then
+         BossName = "Cake Queen [Lv. 2175] [Boss]"
          QuestNameBoss = "IceCreamIslandQuest"
          LvQuestBoss = 3
          QuestCFrameBoss = CFrame.new(-821.71612548828, 65.819519042969, -10965.169921875)
@@ -418,30 +418,6 @@ elseif ThirdSea then
   MaxLevelSea = 2150
 elseif FirstSea then
    MaxLevelSea = 675
-end
-if ThirdSea then
-   game:GetService("Workspace").Game.P1.Disabled = true
-   game:GetService("Workspace").Game.P2.Disabled = true
-   game:GetService("Workspace").Map.Turtle.TradeTable.P1.Disabled = true
-   game:GetService("Workspace").Map.Turtle.TradeTable.P2.Disabled = true
-
-   for i,v in pairs(game:GetService("Workspace").Map.Turtle:GetDescendants()) do
-      if v:IsA("Seat") then
-         v.Disabled = true
-      end
-   end
-end
-if SecondSea then
-   game:GetService("Workspace").Game.P1.Disabled = true
-   game:GetService("Workspace").Game.P2.Disabled = true
-   game:GetService("Workspace").Map.Dressrosa.TradeTable.P1.Disabled = true
-   game:GetService("Workspace").Map.Dressrosa.TradeTable.P2.Disabled = true
-   for i,v in pairs(game:GetService("Workspace").Map.Dressrosa.Tavern:GetDescendants()) do
-      if v:IsA("Seat") then
-         v.Disabled = true
-      end
-   end
-
 end
 --Get Boss
 for i,v in pairs(require(game:GetService("ReplicatedStorage").Quests)) do
@@ -2536,7 +2512,7 @@ Fruits:addToggle("Get Fruit",false,function(boolen)
                end
             end
          end
-         if v:IsA("Model") and v.Name == "Fruit" and getgenv().NaturalFruit then
+         if v.Name == "Fruit" and getgenv().NaturalFruit then
             if v:FindFirstChild("Handle") then
                DoTween(v:FindFirstChild("Handle").CFrame,getgenv().TweenSpeedTeleportPlace)
             end
