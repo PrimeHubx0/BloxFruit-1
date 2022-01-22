@@ -1,6 +1,6 @@
 --Boronide Obfuscation, v0.3.1
-mt = getrawmetatable(game)
-oldindex = mt.__index
+local mt = getrawmetatable(game)
+local oldindex = mt.__index
 setreadonly(mt, false)
 mt.__index = newcclosure(function(t, k)
    if t:IsA("Mouse") and (k == "Hit") then
@@ -15,8 +15,8 @@ mt.__index = newcclosure(function(t, k)
    return oldindex(t, k)
 end)
 setreadonly(mt, true)
-mt = getrawmetatable(game)
-oldindex = mt.__index
+local mt = getrawmetatable(game)
+local oldindex = mt.__index
 setreadonly(mt, false)
 mt.__index = newcclosure(function(t, k)
     if t:IsA("Mouse") and (k == "Hit" ) then
