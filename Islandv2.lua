@@ -929,6 +929,7 @@ AutoFarm:addToggle("Auto Farm Fruit Mastery(Current Support Sea 2,3)",getgenv().
    end
    while getgenv().AutoFarmFruitMastery and game:GetService("RunService").RenderStepped:wait() do
       if getgenv().AutoFarmFruitMastery then
+	pcall(function()
          FastAttack()
          if Alive() then
             for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
@@ -1123,6 +1124,7 @@ AutoFarm:addToggle("Auto Farm Fruit Mastery(Current Support Sea 2,3)",getgenv().
                end
             end
          end
+	end)
       end
    end
    RemoveFloat()
@@ -1140,6 +1142,7 @@ AutoFarm:addToggle("Auto Farm Gun Mastery(Current Support Sea 2,3)",getgenv().Au
    end
    while getgenv().AutoFarmGunMastery and game:GetService("RunService").RenderStepped:wait() do
       if getgenv().AutoFarmGunMastery then
+	pcall(function()
          FastAttack()
          if Alive() then
             for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
@@ -1277,6 +1280,7 @@ AutoFarm:addToggle("Auto Farm Gun Mastery(Current Support Sea 2,3)",getgenv().Au
                end
             end
          end
+	end)
       end
    end
    RemoveFloat()
