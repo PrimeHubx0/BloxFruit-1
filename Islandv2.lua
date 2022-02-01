@@ -1,5 +1,5 @@
 --Disable Errors
-if getconnections then
+--[[if getconnections then
    for _,v in next, getconnections(game:GetService("LogService").MessageOut) do
        v:Disable()
    end
@@ -7,7 +7,7 @@ if getconnections then
        v:Disable()
    end
    
-end
+end]]
 --Config
 --Teleport Section
 getgenv().CtrlTp = false
@@ -223,9 +223,11 @@ end
 
 function Click()
    pcall(function()
-      --ClickMod.activeController:attack()
-      VirtualUser:CaptureController()
-      VirtualUser:ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+      if Alive() then
+         --ClickMod.activeController:attack()
+         VirtualUser:CaptureController()
+         VirtualUser:ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+      end
    end)
 end
 function Equip(Tool)
@@ -238,16 +240,81 @@ function Equip(Tool)
       end)
    end)
 end
+--For Auto Chest
+function FindNearest(chests)
+   local lowestdist = math.huge -- infinity
+   local chest = nil
+   for i,v in pairs(chests) do
+       if v then
+           local distance = (v.Position - HumanoidRootPart.Position).magnitude
+           if distance < lowestdist then
+            lowestdist = distance
+               chest = v
+           end
+       end
+   end
+   return chest
+end
+--NoClip
+function NoclipLoop()
+   if NoClip == true and speaker.Character ~= nil and not DisabledNoClip then
+      for _, child in pairs(Char:GetDescendants()) do
+         if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
+            child.CanCollide = false
+         end
+      end
+   end
+end
+--Do Tween
+function DoTween(dist, Speed)
+   local range = (HumanoidRootPart.Position - dist.Position).magnitude
+   if getgenv().RecommendedSpeed then
+      if range <= 300 then
+         NewSpeed = 1000
+      elseif range <= 500 and range > 300 then
+         NewSpeed = 350
+      else
+         NewSpeed = 275
+      end
+   end
+   if getgenv().RecommendedSpeed then
+      RealSpeed = NewSpeed
+   else
+      RealSpeed = Speed
+   end
+   local info = TweenInfo.new((HumanoidRootPart.Position - dist.Position).magnitude / RealSpeed,Enum.EasingStyle.Linear)
 
+   local tween =  game:service"TweenService":Create(HumanoidRootPart, info, {CFrame = dist})
+   if CanTween and Alive() then
+      tween:Play()
+      Tweening = true
+      TweenFloat()
+      SeatsFunction()
+      game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Died:Connect(function()
+         if tween then
+            tween:Cancel()
+         end
+      end)
 
+      tween.Completed:wait()
+      Tweening = false
+      RemoveFloat()
+      SeatsFunction()
+   else
+      tween:Cancel()
+   end
+  
+end
 
 function FastAttack()
    pcall(function()
       if getgenv().FastAttack then
-         ClickMod.activeController.attacking = false 
-         ClickMod.activeController.active = false
-         ClickMod.activeController.timeToNextAttack = 0
-         ClickMod.activeController.increment = 5
+         if Alive() then
+            ClickMod.activeController.attacking = false 
+            ClickMod.activeController.active = false
+            ClickMod.activeController.timeToNextAttack = 0
+            ClickMod.activeController.increment = 5
+         end
      end
    end)
 end
@@ -312,6 +379,145 @@ local function refreshBosses()
    end
  end
 
+function TPSpecificPlace()
+   if SecondSea then
+      if HighestLvToFarm == 1250 or HighestLvToFarm == 1275 or HighestLvToFarm == 1300 or HighestLvToFarm == 1325 then
+         if (HumanoidRootPart.Position - Vector3.new(923.21252441406, 125.05710601807, 32852.83203125)).magnitude > 3000 then
+            local args = {
+               [1] = "requestEntrance",
+               [2] = Vector3.new(923.21252441406, 126.9760055542, 32852.83203125)
+            }
+
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+         end
+      end
+   elseif FirstSea then
+      if HighestLvToFarm == 375 or HighestLvToFarm == 400 then
+         if (HumanoidRootPart.Position - Vector3.new(61163.8515625, 11.6796875, 1819.7841796875)).magnitude > 3000 then
+
+            local args = {
+               [1] = "requestEntrance",
+               [2] = Vector3.new(61163.8515625, 11.6796875, 1819.7841796875)
+            }
+
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+         end
+      end
+   end
+end
+function BringMob()
+   if getgenv().AutoFarmBring and DoMagnet then
+      for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+         if v.Parent and v:FindFirstChild("HumanoidRootPart") ~= nil and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0  and not Tweening  then
+            if v.Parent and Alive() and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and not Tweening and (v.HumanoidRootPart.Position-HumanoidRootPart.Position).magnitude <=  350 and not Tweening then 
+               if v.Name == NameMob or (string.find(v.Name,CurrentMobName) and string.find(v.Name,HighestLvToFarm) ) or string.find(v.Name,SpecialMob) and not string.find(v.name,"Boss") then
+                  Simulation()
+                  HitBoxPlr()
+                  v.Humanoid.WalkSpeed = 0
+                  v.HumanoidRootPart.Transparency = 1
+                  v.HumanoidRootPart.CanCollide = false
+                  v.HumanoidRootPart.Size = Vector3.new(10, 2, 10)
+                  if BringCFrame~= nil and BringPos ~= nil  and  (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 300 then
+                     Simulation()
+                     v.HumanoidRootPart.CFrame = BringCFrame
+                     v.HumanoidRootPart.Position = BringPos
+                  end
+               end
+            end
+         end
+      end
+   end
+end
+function BringMobBone()
+   if getgenv().AutoFarmBring and DoMagnet then
+       if ThirdSea then
+           for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+               if v.Parent and v:FindFirstChild("HumanoidRootPart") ~= nil and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0  and not Tweening then
+                   if  v.Parent and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").Health > 0 and game.Players.LocalPlayer.Character and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and not Tweening and (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <=  2500 then -- and string.find(v.Name,HighestLvToFarm) and not BringBone  
+                       Simulation()
+                       --Spawn(function()
+                         --if getgenv().AutoFarmBone then
+                             --for i2,v2 in pairs(v:GetChildren()) do
+                                --if v2:IsA("BasePart") or v2.ClassName == "MeshPart" or v2.Name == "Head" and getgenv().AutoFarmBone then
+                                   --v2.Transparency = 0.9
+                               -- elseif v2.ClassName == "Accessory"  and getgenv().AutoFarmBone then
+                                   --v2.Handle.Transparency = 0.9
+                               -- end
+                            -- end
+                          --end
+                      --end)
+                       --v.Humanoid.Sit = true
+                       --if v.Parent ~= nil  then
+                          --for _, child in pairs(v:GetDescendants()) do
+                             --if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
+                                --child.CanCollide = false
+                             --end
+                          --end
+                       --end
+                       --v.Humanoid.PlatformStand = true
+                       v.Humanoid.WalkSpeed = 1
+                       v.HumanoidRootPart.Transparency = 1
+                       --v.HumanoidRootPart.CanCollide = false
+                       --v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                       if BringCFrame~= nil and BringPos ~= nil  and  (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 300 then
+                          Simulation()
+                          v.HumanoidRootPart.CFrame = BringCFrame
+                          v.HumanoidRootPart.Position = BringPos
+                       else 
+                         -- BringCFrame = v.HumanoidRootPart.CFrame
+                         -- BringPos = v.HumanoidRootPart.Position
+                       end
+                   end
+               end
+           end
+       end
+   end
+end
+function BringMobEctoplasm()
+  if getgenv().AutoFarmBring and DoMagnet then
+      if SecondSea then
+          for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+              if v.Parent and v:FindFirstChild("HumanoidRootPart") ~= nil and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0  and not Tweening then
+                  if  v.Parent and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").Health > 0 and game.Players.LocalPlayer.Character and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and not Tweening and (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <=  2500 then -- and string.find(v.Name,HighestLvToFarm) and not BringBone  
+                      Simulation()
+                      --Spawn(function()
+                        --if getgenv().AutoFarmBone then
+                            --for i2,v2 in pairs(v:GetChildren()) do
+                               --if v2:IsA("BasePart") or v2.ClassName == "MeshPart" or v2.Name == "Head" and getgenv().AutoFarmBone then
+                                  --v2.Transparency = 0.9
+                              -- elseif v2.ClassName == "Accessory"  and getgenv().AutoFarmBone then
+                                  --v2.Handle.Transparency = 0.9
+                              -- end
+                           -- end
+                         --end
+                     --end)
+                      --v.Humanoid.Sit = true
+                      --if v.Parent ~= nil  then
+                         --for _, child in pairs(v:GetDescendants()) do
+                            --if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
+                               --child.CanCollide = false
+                            --end
+                         --end
+                      --end
+                      --v.Humanoid.PlatformStand = true
+                      v.Humanoid.WalkSpeed = 1
+                      v.HumanoidRootPart.Transparency = 1
+                      --v.HumanoidRootPart.CanCollide = false
+                      --v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                      if BringCFrame~= nil and BringPos ~= nil  and  (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 300 then
+                         Simulation()
+                         v.HumanoidRootPart.CFrame = BringCFrame
+                         v.HumanoidRootPart.Position = BringPos
+                      else 
+                        -- BringCFrame = v.HumanoidRootPart.CFrame
+                        -- BringPos = v.HumanoidRootPart.Position
+                      end
+                  end
+              end
+          end
+      end
+  end
+end
 function CheckQuestBoss()
    if FirstSea then
       if getgenv().ChosenBoss == "Saber Expert [Lv. 200] [Boss]" then
@@ -440,127 +646,15 @@ function CheckQuestBoss()
          QuestNameBoss = "DeepForestIsland"
          LvQuestBoss = 3
          QuestCFrameBoss = CFrame.new(-13231.1602, 333.744446, -7624.40723)
-      elseif getgenv().ChosenBoss == "Cake Queen" then
-         BossName = "Cake Queen"
+      elseif getgenv().ChosenBoss == "Cake Queen [Lv. 2175] [Boss]" then
+         BossName = "Cake Queen [Lv. 2175] [Boss]"
          QuestNameBoss = "IceCreamIslandQuest"
          LvQuestBoss = 3
          QuestCFrameBoss = CFrame.new(-821.71612548828, 65.819519042969, -10965.169921875)
       end
 	end 
 end
-function BringMob()
-   if getgenv().AutoFarmBring and DoMagnet then
-      for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-         if v.Parent and v:FindFirstChild("HumanoidRootPart") ~= nil and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0  and not Tweening  then
-            if v.Parent and Alive() and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and not Tweening and (v.HumanoidRootPart.Position-HumanoidRootPart.Position).magnitude <=  350 and not Tweening then 
-               if v.Name == NameMob or (string.find(v.Name,CurrentMobName) and string.find(v.Name,HighestLvToFarm) ) or string.find(v.Name,SpecialMob) and not string.find(v.name,"Boss") then
-                  Simulation()
-                  HitBoxPlr()
-                  v.Humanoid.WalkSpeed = 0
-                  v.HumanoidRootPart.Transparency = 1
-                  v.HumanoidRootPart.CanCollide = false
-                  v.HumanoidRootPart.Size = Vector3.new(10, 2, 10)
-                  if BringCFrame~= nil and BringPos ~= nil  and  (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 300 then
-                     Simulation()
-                     v.HumanoidRootPart.CFrame = BringCFrame
-                     v.HumanoidRootPart.Position = BringPos
-                  end
-               end
-            end
-         end
-      end
-   end
-end
-function BringMobBone()
-   if getgenv().AutoFarmBring and DoMagnet then
-       if ThirdSea then
-           for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-               if v.Parent and v:FindFirstChild("HumanoidRootPart") ~= nil and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0  and not Tweening then
-                   if  v.Parent and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").Health > 0 and game.Players.LocalPlayer.Character and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and not Tweening and (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <=  2500 then -- and string.find(v.Name,HighestLvToFarm) and not BringBone  
-                       Simulation()
-                       --Spawn(function()
-                         --if getgenv().AutoFarmBone then
-                             --for i2,v2 in pairs(v:GetChildren()) do
-                                --if v2:IsA("BasePart") or v2.ClassName == "MeshPart" or v2.Name == "Head" and getgenv().AutoFarmBone then
-                                   --v2.Transparency = 0.9
-                               -- elseif v2.ClassName == "Accessory"  and getgenv().AutoFarmBone then
-                                   --v2.Handle.Transparency = 0.9
-                               -- end
-                            -- end
-                          --end
-                      --end)
-                       --v.Humanoid.Sit = true
-                       --if v.Parent ~= nil  then
-                          --for _, child in pairs(v:GetDescendants()) do
-                             --if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
-                                --child.CanCollide = false
-                             --end
-                          --end
-                       --end
-                       --v.Humanoid.PlatformStand = true
-                       v.Humanoid.WalkSpeed = 1
-                       v.HumanoidRootPart.Transparency = 1
-                       --v.HumanoidRootPart.CanCollide = false
-                       --v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                       if BringCFrame~= nil and BringPos ~= nil  and  (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 300 then
-                          Simulation()
-                          v.HumanoidRootPart.CFrame = BringCFrame
-                          v.HumanoidRootPart.Position = BringPos
-                       else 
-                         -- BringCFrame = v.HumanoidRootPart.CFrame
-                         -- BringPos = v.HumanoidRootPart.Position
-                       end
-                   end
-               end
-           end
-       end
-   end
-end
-function BringMobEctoplasm()
-  if getgenv().AutoFarmBring and DoMagnet then
-      if SecondSea then
-          for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-              if v.Parent and v:FindFirstChild("HumanoidRootPart") ~= nil and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0  and not Tweening then
-                  if  v.Parent and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").Health > 0 and game.Players.LocalPlayer.Character and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and not Tweening and (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <=  2500 then -- and string.find(v.Name,HighestLvToFarm) and not BringBone  
-                      Simulation()
-                      --Spawn(function()
-                        --if getgenv().AutoFarmBone then
-                            --for i2,v2 in pairs(v:GetChildren()) do
-                               --if v2:IsA("BasePart") or v2.ClassName == "MeshPart" or v2.Name == "Head" and getgenv().AutoFarmBone then
-                                  --v2.Transparency = 0.9
-                              -- elseif v2.ClassName == "Accessory"  and getgenv().AutoFarmBone then
-                                  --v2.Handle.Transparency = 0.9
-                              -- end
-                           -- end
-                         --end
-                     --end)
-                      --v.Humanoid.Sit = true
-                      --if v.Parent ~= nil  then
-                         --for _, child in pairs(v:GetDescendants()) do
-                            --if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
-                               --child.CanCollide = false
-                            --end
-                         --end
-                      --end
-                      --v.Humanoid.PlatformStand = true
-                      v.Humanoid.WalkSpeed = 1
-                      v.HumanoidRootPart.Transparency = 1
-                      --v.HumanoidRootPart.CanCollide = false
-                      --v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                      if BringCFrame~= nil and BringPos ~= nil  and  (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 300 then
-                         Simulation()
-                         v.HumanoidRootPart.CFrame = BringCFrame
-                         v.HumanoidRootPart.Position = BringPos
-                      else 
-                        -- BringCFrame = v.HumanoidRootPart.CFrame
-                        -- BringPos = v.HumanoidRootPart.Position
-                      end
-                  end
-              end
-          end
-      end
-  end
-end
+
 function refreshWeapon1()
 
   table.clear(PLrWeapons)
@@ -580,6 +674,423 @@ function refreshWeapon1()
      end
   end
 
+end
+function CheckQuestMob()
+   local PlrLevel = game.Players.localPlayer.Data.Level.Value
+   if FirstSea then
+      if HighestLvToFarm == 0 then
+         CurrentQuestMob = "BanditQuest1"
+         NameMob = "Bandit [Lv. 5]"
+         CurrentMobName = "Bandit"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(1061.66699, 16.5166187, 1544.52905, -0.942978859, -3.33851502e-09, 0.332852632, 7.04340497e-09, 1, 2.99841325e-08, -0.332852632, 3.06188177e-08, -0.942978859)
+         SpawnPoint = "Default"
+         SpawnCFrame = CFrame.new(977.038269, 16.5166149, 1420.94336, 0.97796452, 0, -0.208771184, -0, 1, -0, 0.208771184, 0, 0.97796452)
+      elseif HighestLvToFarm == 10 then
+         SpawnPoint = "Jungle"
+         SpawnCFrame = CFrame.new(-1332.1394, 11.8529119, 492.35907, -0.774900496, -1.23768311e-08, 0.632082939, 1.77851245e-08, 1, 4.13846735e-08, -0.632082939, 4.33106848e-08, -0.774900496)
+         CurrentQuestMob = "JungleQuest"
+         NameMob = "Monkey [Lv. 14]"
+         CurrentMobName = "Monkey"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-1604.12012, 36.8521118, 154.23732, 0.0648873374, -4.70858913e-06, -0.997892559, 1.41431883e-07, 1, -4.70933674e-06, 0.997892559, 1.64442184e-07, 0.0648873374)
+      elseif HighestLvToFarm == 15 then
+         SpawnCFrame = CFrame.new(-1332.1394, 11.8529119, 492.35907, -0.774900496, -1.23768311e-08, 0.632082939, 1.77851245e-08, 1, 4.13846735e-08, -0.632082939, 4.33106848e-08, -0.774900496)
+         SpawnPoint = "Jungle"
+         CurrentQuestMob = "JungleQuest"
+         NameMob = "Gorilla [Lv. 20]"
+         CurrentMobName = "Gorilla"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-1604.12012, 36.8521118, 154.23732, 0.0648873374, -4.70858913e-06, -0.997892559, 1.41431883e-07, 1, -4.70933674e-06, 0.997892559, 1.64442184e-07, 0.0648873374)
+      elseif HighestLvToFarm == 30 then
+         SpawnCFrame = CFrame.new(-1186.37769, 4.75154591, 3810.49243, 0.508615494, 0, -0.860993803, -0, 1, -0, 0.860993803, 0, 0.508615494)
+         SpawnPoint = "Pirate"
+         CurrentQuestMob = "BuggyQuest1"
+         NameMob = "Pirate [Lv. 35]"
+         CurrentMobName = "Pirate"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-1139.59717, 4.75205183, 3825.16211, -0.959730506, -7.5857054e-09, 0.280922383, -4.06310328e-08, 1, -1.11807175e-07, -0.280922383, -1.18718916e-07, -0.959730506)
+      elseif HighestLvToFarm == 40 then
+         SpawnCFrame = CFrame.new(-1186.37769, 4.75154591, 3810.49243, 0.508615494, 0, -0.860993803, -0, 1, -0, 0.860993803, 0, 0.508615494)
+         SpawnPoint = "Pirate"
+         CurrentQuestMob = "BuggyQuest1"
+         NameMob = "Brute [Lv. 45]"
+         CurrentMobName = "Brute"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-1139.59717, 4.75205183, 3825.16211, -0.959730506, -7.5857054e-09, 0.280922383, -4.06310328e-08, 1, -1.11807175e-07, -0.280922383, -1.18718916e-07, -0.959730506)
+      elseif HighestLvToFarm == 60 then
+         SpawnPoint = "Desert"
+         SpawnCFrame = CFrame.new(917.85199, 3.37914562, 4114.66895, 0.203889921, -7.29310585e-08, 0.978993833, -8.66312355e-09, 1, 7.63001538e-08, -0.978993833, -2.40379769e-08, 0.203889921)
+         CurrentQuestMob = "DesertQuest"
+         NameMob = "Desert Bandit [Lv. 60]"
+         CurrentMobName = "Desert Bandit"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(897.031128, 6.43846416, 4388.97168, -0.804044724, 3.68233266e-08, 0.594568789, 6.97835176e-08, 1, 3.24365246e-08, -0.594568789, 6.75715199e-08, -0.804044724)
+      elseif HighestLvToFarm == 75 then
+         SpawnPoint = "Desert"
+         SpawnCFrame = CFrame.new(917.85199, 3.37914562, 4114.66895, 0.203889921, -7.29310585e-08, 0.978993833, -8.66312355e-09, 1, 7.63001538e-08, -0.978993833, -2.40379769e-08, 0.203889921)
+         CurrentQuestMob = "DesertQuest"
+         NameMob = "Desert Officer [Lv. 70]"
+         CurrentMobName = "Desert Officer"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(897.031128, 6.43846416, 4388.97168, -0.804044724, 3.68233266e-08, 0.594568789, 6.97835176e-08, 1, 3.24365246e-08, -0.594568789, 6.75715199e-08, -0.804044724)
+      elseif HighestLvToFarm == 90 then
+         SpawnPoint = "Ice"
+         SpawnCFrame = CFrame.new(1107.42444, 7.3035593, -1164.79614, 0.548184574, -8.23326758e-08, 0.836357415, 4.65359591e-08, 1, 6.79403129e-08, -0.836357415, 1.67686287e-09, 0.548184574)
+         CurrentQuestMob = "SnowQuest"
+         NameMob = "Snow Bandit [Lv. 90]"
+         CurrentMobName = "Snow Bandit"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(1384.14001, 87.272789, -1297.06482, 0.348555952, -2.53947841e-09, -0.937287986, 1.49860568e-08, 1, 2.86358204e-09, 0.937287986, -1.50443711e-08, 0.348555952)
+      elseif HighestLvToFarm == 100 then
+         SpawnPoint = "Ice"
+         SpawnCFrame = CFrame.new(1107.42444, 7.3035593, -1164.79614, 0.548184574, -8.23326758e-08, 0.836357415, 4.65359591e-08, 1, 6.79403129e-08, -0.836357415, 1.67686287e-09, 0.548184574)
+         CurrentQuestMob = "SnowQuest"
+         NameMob = "Snowman [Lv. 100]"
+         CurrentMobName = "Snowman"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(1384.14001, 87.272789, -1297.06482, 0.348555952, -2.53947841e-09, -0.937287986, 1.49860568e-08, 1, 2.86358204e-09, 0.937287986, -1.50443711e-08, 0.348555952)
+      elseif HighestLvToFarm == 120 then
+         SpawnPoint = "MarineBase"
+         SpawnCFrame = CFrame.new(-4922.20264, 41.2520523, 4424.44434, -0.488673091, -2.20081375e-08, 0.872467041, 1.13403127e-08, 1, 3.15769455e-08, -0.872467041, 2.53248498e-08, -0.488673091)
+         CurrentQuestMob = "MarineQuest2"
+         NameMob = "Chief Petty Officer [Lv. 120]"
+         CurrentMobName = "Chief Petty Officer"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-5035.0835, 28.6520386, 4325.29443, 0.0243340395, -7.08064647e-08, 0.999703884, -6.36926814e-08, 1, 7.23777944e-08, -0.999703884, -6.54350671e-08, 0.0243340395)
+      elseif HighestLvToFarm == 150 then
+         SpawnPoint = "Sky"
+         SpawnCFrame = CFrame.new(-4916.79346, 717.671265, -2637.03589, 0.808458745, 2.83643207e-08, 0.588552833, -4.5316173e-09, 1, -4.19685264e-08, -0.588552833, 3.12627257e-08, 0.808458745)
+         CurrentQuestMob = "SkyQuest"
+         NameMob = "Sky Bandit [Lv. 150]"
+         CurrentMobName = "Sky Bandit"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-4841.83447, 717.669617, -2623.96436, -0.875942111, 5.59710216e-08, -0.482416272, 3.04023082e-08, 1, 6.08195947e-08, 0.482416272, 3.86078725e-08, -0.875942111)
+      elseif HighestLvToFarm == 175 then
+         SpawnPoint = "Sky"
+         SpawnCFrame = CFrame.new(-4916.79346, 717.671265, -2637.03589, 0.808458745, 2.83643207e-08, 0.588552833, -4.5316173e-09, 1, -4.19685264e-08, -0.588552833, 3.12627257e-08, 0.808458745)
+         CurrentQuestMob = "SkyQuest"
+         NameMob = "Dark Master [Lv. 175]"
+         CurrentMobName = "Dark Master"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-4841.83447, 717.669617, -2623.96436, -0.875942111, 5.59710216e-08, -0.482416272, 3.04023082e-08, 1, 6.08195947e-08, 0.482416272, 3.86078725e-08, -0.875942111)
+      elseif HighestLvToFarm == 225 then
+         SpawnPoint = "Colosseum"
+         NameMob = "Toga Warrior [Lv. 225]"
+         CurrentMobName = "Toga Warrior" 
+         SpawnCFrame = CFrame.new(-1393.48926, 7.28934002, -2842.57324, -0.998255789, 6.55446408e-09, 0.0590373725, 6.72640565e-09, 1, 2.7136855e-09, -0.0590373725, 3.10606163e-09, -0.998255789)
+         CurrentQuestMob = "ColosseumQuest"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-1576.11743, 7.38933945, -2983.30762, 0.576966345, 1.22114863e-09, 0.816767931, -3.58496594e-10, 1, -1.24185606e-09, -0.816767931, 4.2370063e-10, 0.576966345)
+      elseif HighestLvToFarm == 275 then
+         SpawnPoint = "Colosseum"
+         NameMob = "Gladiator [Lv. 275]"
+         CurrentMobName = "Gladiator"
+         SpawnCFrame = CFrame.new(-1393.48926, 7.28934002, -2842.57324, -0.998255789, 6.55446408e-09, 0.0590373725, 6.72640565e-09, 1, 2.7136855e-09, -0.0590373725, 3.10606163e-09, -0.998255789)
+         CurrentQuestMob = "ColosseumQuest"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-1576.11743, 7.38933945, -2983.30762, 0.576966345, 1.22114863e-09, 0.816767931, -3.58496594e-10, 1, -1.24185606e-09, -0.816767931, 4.2370063e-10, 0.576966345)
+      elseif HighestLvToFarm == 300  then
+         SpawnPoint = "Magma"
+         SpawnCFrame = CFrame.new(-5226.26416, 8.59022045, 8472.14844, 0.506667018, 0, -0.862141788, -0, 1, -0, 0.862141907, 0, 0.506666958)
+         CurrentQuestMob = "MagmaQuest"
+         NameMob = "Military Soldier [Lv. 300]"
+         CurrentMobName = "Military Soldier"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-5316.55859, 12.2370615, 8517.2998, 0.588437557, -1.37880001e-08, -0.808542669, -2.10116209e-08, 1, -3.23446478e-08, 0.808542669, 3.60215964e-08, 0.588437557)
+      elseif HighestLvToFarm == 300 then
+         CurrentQuestMob = "MagmaQuest"
+         SpawnCFrame = CFrame.new(-5226.26416, 8.59022045, 8472.14844, 0.506667018, 0, -0.862141788, -0, 1, -0, 0.862141907, 0, 0.506666958)
+         CurrentQuestMob = "MagmaQuest"
+         CurrentMobName = "Military Spy"
+         NameMob = "Military Spy [Lv. 330]"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-5316.55859, 12.2370615, 8517.2998, 0.588437557, -1.37880001e-08, -0.808542669, -2.10116209e-08, 1, -3.23446478e-08, 0.808542669, 3.60215964e-08, 0.588437557)
+      elseif HighestLvToFarm == 375 then
+         CurrentQuestMob = "FishmanQuest"
+         NameMob = "Fishman Warrior [Lv. 375]"
+         CurrentMobName = "Fishman Warrior"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(61122.5625, 18.4716396, 1568.16504, 0.893533468, 3.95251609e-09, 0.448996574, -2.34327455e-08, 1, 3.78297464e-08, -0.448996574, -4.43233645e-08, 0.893533468)
+      elseif HighestLvToFarm == 400 then
+         CurrentQuestMob = "FishmanQuest"
+         NameMob = "Fishman Commando [Lv. 400]"
+         CurrentMobName = "Fishman Commando"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(61122.5625, 18.4716396, 1568.16504, 0.893533468, 3.95251609e-09, 0.448996574, -2.34327455e-08, 1, 3.78297464e-08, -0.448996574, -4.43233645e-08, 0.893533468)
+      elseif HighestLvToFarm == 450 then
+         SpawnPoint = "Sky"
+         NameMob = "God's Guard [Lv. 450]"
+         CurrentMobName = "God's Guard"
+         SpawnCFrame = CFrame.new(-4916.79346, 717.671265, -2637.03589, 0.808458745, 2.83643207e-08, 0.588552833, -4.5316173e-09, 1, -4.19685264e-08, -0.588552833, 3.12627257e-08, 0.808458745)
+         CurrentQuestMob = "SkyExp1Quest"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-4721.71436, 845.277161, -1954.20105, -0.999277651, -5.56969759e-09, 0.0380011722, -4.14751478e-09, 1, 3.75035256e-08, -0.0380011722, 3.73188307e-08, -0.999277651)
+      elseif HighestLvToFarm == 475  then
+         SpawnPoint = "Sky2"
+         SpawnCFrame = CFrame.new(-7873.7959, 5545.49316, -335.85321, -0.8423931, 4.59006095e-08, -0.53886348, 3.20399991e-08, 1, 3.50930023e-08, 0.53886348, 1.22969173e-08, -0.8423931)
+         CurrentQuestMob = "SkyExp1Quest"
+         NameMob = "Shanda [Lv. 475]"
+         CurrentMobName = "Shanda"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-7863.63672, 5545.49316, -379.826324, 0.362120807, -1.98046344e-08, -0.93213129, 4.05822291e-08, 1, -5.48095125e-09, 0.93213129, -3.58431969e-08, 0.362120807)
+      elseif HighestLvToFarm == 525  then
+         SpawnPoint = "Sky2"
+         SpawnCFrame = CFrame.new(-7873.7959, 5545.49316, -335.85321, -0.8423931, 4.59006095e-08, -0.53886348, 3.20399991e-08, 1, 3.50930023e-08, 0.53886348, 1.22969173e-08, -0.8423931)
+         CurrentQuestMob = "SkyExp2Quest"
+         NameMob = "Royal Squad [Lv. 525]"
+         CurrentMobName = "Royal Squad"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-7902.66895, 5635.96387, -1411.71802, 0.0504222959, 2.5710392e-08, 0.998727977, 1.12541557e-07, 1, -3.14249675e-08, -0.998727977, 1.13982921e-07, 0.0504222959)
+      elseif HighestLvToFarm == 550  then
+         SpawnPoint = "Sky2"
+         SpawnCFrame = CFrame.new(-7873.7959, 5545.49316, -335.85321, -0.8423931, 4.59006095e-08, -0.53886348, 3.20399991e-08, 1, 3.50930023e-08, 0.53886348, 1.22969173e-08, -0.8423931)
+         CurrentQuestMob = "SkyExp2Quest"
+         CurrentMobName = "Royal Soldier"
+         NameMob = "Royal Soldier [Lv. 550]"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-7902.66895, 5635.96387, -1411.71802, 0.0504222959, 2.5710392e-08, 0.998727977, 1.12541557e-07, 1, -3.14249675e-08, -0.998727977, 1.13982921e-07, 0.0504222959)
+      elseif HighestLvToFarm == 625  then
+         SpawnPoint = "Fountain"
+         SpawnCFrame = CFrame.new(5187.77197, 38.5011406, 4141.60791, 0.779290736, 0, 0.626662672, -0, 1.00000012, -0, -0.626662731, 0, 0.779290617)
+         CurrentQuestMob = "FountainQuest"
+         NameMob = "Galley Pirate [Lv. 625]"
+         CurrentMobName = "Galley Pirate"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(5254.60156, 38.5011406, 4049.69678, -0.0504891425, -3.62066501e-08, -0.998724639, -9.87921389e-09, 1, -3.57534553e-08, 0.998724639, 8.06145284e-09, -0.0504891425)
+      elseif HighestLvToFarm == 650 then
+         SpawnPoint = "Fountain"
+         SpawnCFrame = CFrame.new(5187.77197, 38.5011406, 4141.60791, 0.779290736, 0, 0.626662672, -0, 1.00000012, -0, -0.626662731, 0, 0.779290617)
+         CurrentQuestMob = "FountainQuest"
+         NameMob = "Galley Captain [Lv. 650]"
+         CurrentMobName = "Galley Captain"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(5254.60156, 38.5011406, 4049.69678, -0.0504891425, -3.62066501e-08, -0.998724639, -9.87921389e-09, 1, -3.57534553e-08, 0.998724639, 8.06145284e-09, -0.0504891425)
+      end
+   end
+end
+function CheckManually()
+   CheckLv()
+   if FirstSea then
+      if HighestLvToFarm == 0 then
+         FarmingPlace1 = CFrame.new(1001.7659301758, 16.328723907471, 1594.1104736328)
+         FarmingPlace2 = nil
+         CurrentQuestMob = "BanditQuest1"
+         NameMob = "Bandit [Lv. 5]"
+         CurrentMobName = "Bandit"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(1061.66699, 16.5166187, 1544.52905, -0.942978859, -3.33851502e-09, 0.332852632, 7.04340497e-09, 1, 2.99841325e-08, -0.332852632, 3.06188177e-08, -0.942978859)
+         SpawnPoint = "Default"
+         SpawnCFrame = CFrame.new(977.038269, 16.5166149, 1420.94336, 0.97796452, 0, -0.208771184, -0, 1, -0, 0.208771184, 0, 0.97796452)
+      elseif HighestLvToFarm == 10 then
+         FarmingPlace1 = CFrame.new(-1385.0048828125, 22.852113723755, 62.525402069092)
+         FarmingPlace2 = CFrame.new(-1683.5257568359, 15.852045059204, 176.0375213623)
+         SpawnPoint = "Jungle"
+         SpawnCFrame = CFrame.new(-1332.1394, 11.8529119, 492.35907, -0.774900496, -1.23768311e-08, 0.632082939, 1.77851245e-08, 1, 4.13846735e-08, -0.632082939, 4.33106848e-08, -0.774900496)
+         CurrentQuestMob = "JungleQuest"
+         NameMob = "Monkey [Lv. 14]"
+         CurrentMobName = "Monkey"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-1604.12012, 36.8521118, 154.23732, 0.0648873374, -4.70858913e-06, -0.997892559, 1.41431883e-07, 1, -4.70933674e-06, 0.997892559, 1.64442184e-07, 0.0648873374)
+      elseif HighestLvToFarm == 15 then
+         FarmingPlace1 = CFrame.new(-1258.6610107422, 6.2793760299683, -494.70080566406)
+         FarmingPlace2 = nil
+         SpawnCFrame = CFrame.new(-1332.1394, 11.8529119, 492.35907, -0.774900496, -1.23768311e-08, 0.632082939, 1.77851245e-08, 1, 4.13846735e-08, -0.632082939, 4.33106848e-08, -0.774900496)
+         SpawnPoint = "Jungle"
+         CurrentQuestMob = "JungleQuest"
+         NameMob = "Gorilla [Lv. 20]"
+         CurrentMobName = "Gorilla"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-1604.12012, 36.8521118, 154.23732, 0.0648873374, -4.70858913e-06, -0.997892559, 1.41431883e-07, 1, -4.70933674e-06, 0.997892559, 1.64442184e-07, 0.0648873374)
+      elseif HighestLvToFarm == 30 then
+         FarmingPlace1 = CFrame.new(-1100.0310058594, 13.752056121826, 3963.2993164062)
+         FarmingPlace2 = nil    
+         SpawnCFrame = CFrame.new(-1186.37769, 4.75154591, 3810.49243, 0.508615494, 0, -0.860993803, -0, 1, -0, 0.860993803, 0, 0.508615494)
+         SpawnPoint = "Pirate"
+         CurrentQuestMob = "BuggyQuest1"
+         NameMob = "Pirate [Lv. 35]"
+         CurrentMobName = "Pirate"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-1139.59717, 4.75205183, 3825.16211, -0.959730506, -7.5857054e-09, 0.280922383, -4.06310328e-08, 1, -1.11807175e-07, -0.280922383, -1.18718916e-07, -0.959730506)
+      elseif HighestLvToFarm == 40 then
+         FarmingPlace1 = CFrame.new(-1144.1635742188, 14.809885025024, 4293.6352539062)
+         FarmingPlace2 = nil   
+         
+         SpawnCFrame = CFrame.new(-1186.37769, 4.75154591, 3810.49243, 0.508615494, 0, -0.860993803, -0, 1, -0, 0.860993803, 0, 0.508615494)
+         SpawnPoint = "Pirate"
+         CurrentQuestMob = "BuggyQuest1"
+         NameMob = "Brute [Lv. 45]"
+         CurrentMobName = "Brute"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-1139.59717, 4.75205183, 3825.16211, -0.959730506, -7.5857054e-09, 0.280922383, -4.06310328e-08, 1, -1.11807175e-07, -0.280922383, -1.18718916e-07, -0.959730506)
+      elseif HighestLvToFarm == 60 then
+         FarmingPlace1 = CFrame.new(926.37927246094, 6.448634147644, 4464.7836914062)
+         FarmingPlace2 = nil 
+         SpawnPoint = "Desert"
+         SpawnCFrame = CFrame.new(917.85199, 3.37914562, 4114.66895, 0.203889921, -7.29310585e-08, 0.978993833, -8.66312355e-09, 1, 7.63001538e-08, -0.978993833, -2.40379769e-08, 0.203889921)
+         CurrentQuestMob = "DesertQuest"
+         NameMob = "Desert Bandit [Lv. 60]"
+         CurrentMobName = "Desert Bandit"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(897.031128, 6.43846416, 4388.97168, -0.804044724, 3.68233266e-08, 0.594568789, 6.97835176e-08, 1, 3.24365246e-08, -0.594568789, 6.75715199e-08, -0.804044724)
+      elseif HighestLvToFarm == 75 then
+         FarmingPlace1 = CFrame.new(1609.8444824219, 1.6109663248062, 4373.2622070312)
+         FarmingPlace2 = nil 
+         
+         SpawnPoint = "Desert"
+         SpawnCFrame = CFrame.new(917.85199, 3.37914562, 4114.66895, 0.203889921, -7.29310585e-08, 0.978993833, -8.66312355e-09, 1, 7.63001538e-08, -0.978993833, -2.40379769e-08, 0.203889921)
+         CurrentQuestMob = "DesertQuest"
+         NameMob = "Desert Officer [Lv. 70]"
+         CurrentMobName = "Desert Officer"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(897.031128, 6.43846416, 4388.97168, -0.804044724, 3.68233266e-08, 0.594568789, 6.97835176e-08, 1, 3.24365246e-08, -0.594568789, 6.75715199e-08, -0.804044724)
+      elseif HighestLvToFarm == 90 then
+         FarmingPlace1 = CFrame.new(1372.1066894531, 87.272773742676, -1362.8063964844)
+         FarmingPlace2 = nil 
+         
+         SpawnPoint = "Ice"
+         SpawnCFrame = CFrame.new(1107.42444, 7.3035593, -1164.79614, 0.548184574, -8.23326758e-08, 0.836357415, 4.65359591e-08, 1, 6.79403129e-08, -0.836357415, 1.67686287e-09, 0.548184574)
+         CurrentQuestMob = "SnowQuest"
+         NameMob = "Snow Bandit [Lv. 90]"
+         CurrentMobName = "Snow Bandit"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(1384.14001, 87.272789, -1297.06482, 0.348555952, -2.53947841e-09, -0.937287986, 1.49860568e-08, 1, 2.86358204e-09, 0.937287986, -1.50443711e-08, 0.348555952)
+      elseif HighestLvToFarm == 100 then
+         FarmingPlace1 = CFrame.new(1143.6586914062, 105.93144226074, -1491.5599365234)
+         FarmingPlace2 = nil 
+         SpawnPoint = "Ice"
+         SpawnCFrame = CFrame.new(1107.42444, 7.3035593, -1164.79614, 0.548184574, -8.23326758e-08, 0.836357415, 4.65359591e-08, 1, 6.79403129e-08, -0.836357415, 1.67686287e-09, 0.548184574)
+         CurrentQuestMob = "SnowQuest"
+         NameMob = "Snowman [Lv. 100]"
+         CurrentMobName = "Snowman"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(1384.14001, 87.272789, -1297.06482, 0.348555952, -2.53947841e-09, -0.937287986, 1.49860568e-08, 1, 2.86358204e-09, 0.937287986, -1.50443711e-08, 0.348555952)
+      elseif HighestLvToFarm == 120 then
+         FarmingPlace1 = CFrame.new(-4688.341796875, 20.652044296265, 4465.873046875)
+         FarmingPlace2 = CFrame.new(-4927.7001953125, 20.652044296265, 4022.1950683594) 
+         
+         SpawnPoint = "MarineBase"
+         SpawnCFrame = CFrame.new(-4922.20264, 41.2520523, 4424.44434, -0.488673091, -2.20081375e-08, 0.872467041, 1.13403127e-08, 1, 3.15769455e-08, -0.872467041, 2.53248498e-08, -0.488673091)
+         CurrentQuestMob = "MarineQuest2"
+         NameMob = "Chief Petty Officer [Lv. 120]"
+         CurrentMobName = "Chief Petty Officer"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-5035.0835, 28.6520386, 4325.29443, 0.0243340395, -7.08064647e-08, 0.999703884, -6.36926814e-08, 1, 7.23777944e-08, -0.999703884, -6.54350671e-08, 0.0243340395)
+      elseif HighestLvToFarm == 150 then
+         SpawnPoint = "Sky"
+         SpawnCFrame = CFrame.new(-4916.79346, 717.671265, -2637.03589, 0.808458745, 2.83643207e-08, 0.588552833, -4.5316173e-09, 1, -4.19685264e-08, -0.588552833, 3.12627257e-08, 0.808458745)
+         CurrentQuestMob = "SkyQuest"
+         NameMob = "Sky Bandit [Lv. 150]"
+         CurrentMobName = "Sky Bandit"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-4841.83447, 717.669617, -2623.96436, -0.875942111, 5.59710216e-08, -0.482416272, 3.04023082e-08, 1, 6.08195947e-08, 0.482416272, 3.86078725e-08, -0.875942111)
+      elseif HighestLvToFarm == 175 then
+         SpawnPoint = "Sky"
+         SpawnCFrame = CFrame.new(-4916.79346, 717.671265, -2637.03589, 0.808458745, 2.83643207e-08, 0.588552833, -4.5316173e-09, 1, -4.19685264e-08, -0.588552833, 3.12627257e-08, 0.808458745)
+         CurrentQuestMob = "SkyQuest"
+         NameMob = "Dark Master [Lv. 175]"
+         CurrentMobName = "Dark Master"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-4841.83447, 717.669617, -2623.96436, -0.875942111, 5.59710216e-08, -0.482416272, 3.04023082e-08, 1, 6.08195947e-08, 0.482416272, 3.86078725e-08, -0.875942111)
+      elseif HighestLvToFarm == 225 then
+         SpawnPoint = "Colosseum"
+         NameMob = "Toga Warrior [Lv. 225]"
+         CurrentMobName = "Toga Warrior" 
+         SpawnCFrame = CFrame.new(-1393.48926, 7.28934002, -2842.57324, -0.998255789, 6.55446408e-09, 0.0590373725, 6.72640565e-09, 1, 2.7136855e-09, -0.0590373725, 3.10606163e-09, -0.998255789)
+         CurrentQuestMob = "ColosseumQuest"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-1576.11743, 7.38933945, -2983.30762, 0.576966345, 1.22114863e-09, 0.816767931, -3.58496594e-10, 1, -1.24185606e-09, -0.816767931, 4.2370063e-10, 0.576966345)
+      elseif HighestLvToFarm == 275 then
+         SpawnPoint = "Colosseum"
+         NameMob = "Gladiator [Lv. 275]"
+         CurrentMobName = "Gladiator"
+         SpawnCFrame = CFrame.new(-1393.48926, 7.28934002, -2842.57324, -0.998255789, 6.55446408e-09, 0.0590373725, 6.72640565e-09, 1, 2.7136855e-09, -0.0590373725, 3.10606163e-09, -0.998255789)
+         CurrentQuestMob = "ColosseumQuest"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-1576.11743, 7.38933945, -2983.30762, 0.576966345, 1.22114863e-09, 0.816767931, -3.58496594e-10, 1, -1.24185606e-09, -0.816767931, 4.2370063e-10, 0.576966345)
+      elseif HighestLvToFarm == 300  then
+         SpawnPoint = "Magma"
+         SpawnCFrame = CFrame.new(-5226.26416, 8.59022045, 8472.14844, 0.506667018, 0, -0.862141788, -0, 1, -0, 0.862141907, 0, 0.506666958)
+         CurrentQuestMob = "MagmaQuest"
+         NameMob = "Military Soldier [Lv. 300]"
+         CurrentMobName = "Military Soldier"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-5316.55859, 12.2370615, 8517.2998, 0.588437557, -1.37880001e-08, -0.808542669, -2.10116209e-08, 1, -3.23446478e-08, 0.808542669, 3.60215964e-08, 0.588437557)
+      elseif HighestLvToFarm == 300 then
+         CurrentQuestMob = "MagmaQuest"
+         SpawnCFrame = CFrame.new(-5226.26416, 8.59022045, 8472.14844, 0.506667018, 0, -0.862141788, -0, 1, -0, 0.862141907, 0, 0.506666958)
+         CurrentQuestMob = "MagmaQuest"
+         CurrentMobName = "Military Spy"
+         NameMob = "Military Spy [Lv. 330]"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-5316.55859, 12.2370615, 8517.2998, 0.588437557, -1.37880001e-08, -0.808542669, -2.10116209e-08, 1, -3.23446478e-08, 0.808542669, 3.60215964e-08, 0.588437557)
+      elseif HighestLvToFarm == 375 then
+         CurrentQuestMob = "FishmanQuest"
+         NameMob = "Fishman Warrior [Lv. 375]"
+         CurrentMobName = "Fishman Warrior"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(61122.5625, 18.4716396, 1568.16504, 0.893533468, 3.95251609e-09, 0.448996574, -2.34327455e-08, 1, 3.78297464e-08, -0.448996574, -4.43233645e-08, 0.893533468)
+      elseif HighestLvToFarm == 400 then
+         CurrentQuestMob = "FishmanQuest"
+         NameMob = "Fishman Commando [Lv. 400]"
+         CurrentMobName = "Fishman Commando"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(61122.5625, 18.4716396, 1568.16504, 0.893533468, 3.95251609e-09, 0.448996574, -2.34327455e-08, 1, 3.78297464e-08, -0.448996574, -4.43233645e-08, 0.893533468)
+      elseif HighestLvToFarm == 450 then
+         SpawnPoint = "Sky"
+         NameMob = "God's Guard [Lv. 450]"
+         CurrentMobName = "God's Guard"
+         SpawnCFrame = CFrame.new(-4916.79346, 717.671265, -2637.03589, 0.808458745, 2.83643207e-08, 0.588552833, -4.5316173e-09, 1, -4.19685264e-08, -0.588552833, 3.12627257e-08, 0.808458745)
+         CurrentQuestMob = "SkyExp1Quest"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-4721.71436, 845.277161, -1954.20105, -0.999277651, -5.56969759e-09, 0.0380011722, -4.14751478e-09, 1, 3.75035256e-08, -0.0380011722, 3.73188307e-08, -0.999277651)
+      elseif HighestLvToFarm == 475  then
+         SpawnPoint = "Sky2"
+         SpawnCFrame = CFrame.new(-7873.7959, 5545.49316, -335.85321, -0.8423931, 4.59006095e-08, -0.53886348, 3.20399991e-08, 1, 3.50930023e-08, 0.53886348, 1.22969173e-08, -0.8423931)
+         CurrentQuestMob = "SkyExp1Quest"
+         NameMob = "Shanda [Lv. 475]"
+         CurrentMobName = "Shanda"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-7863.63672, 5545.49316, -379.826324, 0.362120807, -1.98046344e-08, -0.93213129, 4.05822291e-08, 1, -5.48095125e-09, 0.93213129, -3.58431969e-08, 0.362120807)
+      elseif HighestLvToFarm == 525  then
+         SpawnPoint = "Sky2"
+         SpawnCFrame = CFrame.new(-7873.7959, 5545.49316, -335.85321, -0.8423931, 4.59006095e-08, -0.53886348, 3.20399991e-08, 1, 3.50930023e-08, 0.53886348, 1.22969173e-08, -0.8423931)
+         CurrentQuestMob = "SkyExp2Quest"
+         NameMob = "Royal Squad [Lv. 525]"
+         CurrentMobName = "Royal Squad"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(-7902.66895, 5635.96387, -1411.71802, 0.0504222959, 2.5710392e-08, 0.998727977, 1.12541557e-07, 1, -3.14249675e-08, -0.998727977, 1.13982921e-07, 0.0504222959)
+      elseif HighestLvToFarm == 550  then
+         SpawnPoint = "Sky2"
+         SpawnCFrame = CFrame.new(-7873.7959, 5545.49316, -335.85321, -0.8423931, 4.59006095e-08, -0.53886348, 3.20399991e-08, 1, 3.50930023e-08, 0.53886348, 1.22969173e-08, -0.8423931)
+         CurrentQuestMob = "SkyExp2Quest"
+         CurrentMobName = "Royal Soldier"
+         NameMob = "Royal Soldier [Lv. 550]"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(-7902.66895, 5635.96387, -1411.71802, 0.0504222959, 2.5710392e-08, 0.998727977, 1.12541557e-07, 1, -3.14249675e-08, -0.998727977, 1.13982921e-07, 0.0504222959)
+      elseif HighestLvToFarm == 625  then
+         SpawnPoint = "Fountain"
+         SpawnCFrame = CFrame.new(5187.77197, 38.5011406, 4141.60791, 0.779290736, 0, 0.626662672, -0, 1.00000012, -0, -0.626662731, 0, 0.779290617)
+         CurrentQuestMob = "FountainQuest"
+         NameMob = "Galley Pirate [Lv. 625]"
+         CurrentMobName = "Galley Pirate"
+         CurrentQuestLevelMob = 1
+         QuestCFrame = CFrame.new(5254.60156, 38.5011406, 4049.69678, -0.0504891425, -3.62066501e-08, -0.998724639, -9.87921389e-09, 1, -3.57534553e-08, 0.998724639, 8.06145284e-09, -0.0504891425)
+      elseif HighestLvToFarm == 650 then
+         SpawnPoint = "Fountain"
+         SpawnCFrame = CFrame.new(5187.77197, 38.5011406, 4141.60791, 0.779290736, 0, 0.626662672, -0, 1.00000012, -0, -0.626662731, 0, 0.779290617)
+         CurrentQuestMob = "FountainQuest"
+         NameMob = "Galley Captain [Lv. 650]"
+         CurrentMobName = "Galley Captain"
+         CurrentQuestLevelMob = 2
+         QuestCFrame = CFrame.new(5254.60156, 38.5011406, 4049.69678, -0.0504891425, -3.62066501e-08, -0.998724639, -9.87921389e-09, 1, -3.57534553e-08, 0.998724639, 8.06145284e-09, -0.0504891425)
+      end
+   end
+end
+function CancelQuest()
+   if LP.PlayerGui.Main.Quest.Visible == true then
+      firesignal(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Abandon.MouseButton1Click)
+   end
 end
 loadstring(game:HttpGet("https://raw.githubusercontent.com/vinhuchi/BloxFruit/main/Functions.lua"))()
 
@@ -914,7 +1425,186 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
    end
    RemoveFloat()
 end)
+AutoFarm:addToggle("Auto Farm v2",getgenv().AutoFarm2,function(boolen)
+   getgenv().AutoFarm2  = boolen
+   --Check Quest
+      CheckManually()
 
+   --Equip
+   spawn(function()
+      while getgenv().AutoFarm2 and game:GetService("RunService").RenderStepped:wait(0.1) do
+         
+         if Char:FindFirstChild(Weapon) then
+            Click()
+         else
+            Equip(Weapon)
+         end
+      end
+   end)
+   if getgenv().AutoFarm2 and getgenv().AutoFarmQuest then 
+      CancelQuest()
+   end
+
+   if getgenv().AutoFarm2 then
+      TweenFloat()
+   else 
+      DisabledNoClip = false
+      RemoveFloat()
+   end
+
+   while getgenv().AutoFarm2 and game:GetService("RunService").RenderStepped:wait() do
+      pcall(function()
+         local SmallestDistance = math.huge
+         if Alive() then
+            TPSpecificPlace()
+            Simulation()
+            FastAttack()
+            TweenFloat()
+            --Set Spawn
+            if getgenv().AutoSetSpawn then
+               if game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").Health > 0 and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and getgenv().AutoFarm and game:GetService("Players").LocalPlayer.Data.SpawnPoint.Value ~= SpawnPoint and CanTween then
+                  DoTween(SpawnCFrame,getgenv().TweenSpeedTeleportPlace)
+                  local args = {
+                     [1] = "SetSpawnPoint"
+                  }
+                  game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+                  wait(0.1)
+               end
+            end
+            DoTween(QuestCFrame,getgenv().TweenSpeedQuest)
+            wait(0.1)
+            if getgenv().AutoFarmQuest then
+               if Alive() and getgenv().AutoFarm2 and (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false or not string.find(game.Players.LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text,CurrentMobName)) then
+                  print(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible)
+                  print(CurrentMobName)
+                  print("--------------")
+                  if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position- Vector3.new(QuestCFrame)).magnitude < 50 then
+                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", CurrentQuestMob, CurrentQuestLevelMob)
+                     wait(0.5)
+                  elseif getgenv().AutoFarmQuest and getgenv().AutoFarm2 then 
+                     DoTween(QuestCFrame,getgenv().TweenSpeedQuest)
+                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", CurrentQuestMob, CurrentQuestLevelMob)
+                     wait(0.5)
+                  end
+               end
+            end
+            if FarmingPlace2 == nil then
+               repeat wait() 
+                  if getgenv().AutoFarm2 then
+                     if game.Workspace.Enemies:FindFirstChild(NameMob) then
+                     else
+                        repeat wait() until
+                        game.Workspace.Enemies:FindFirstChild(NameMob) or not getgenv().AutoFarm2
+                     end
+                     if getgenv().AutoFarm2 then
+                        if getgenv().AutoFarmQuest then
+                           if Alive() and getgenv().AutoFarm2 and (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false or not string.find(game.Players.LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text,CurrentMobName)) then
+                              print(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible)
+                              print(CurrentMobName)
+                              print("--------------")
+                              if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position- Vector3.new(QuestCFrame)).magnitude < 50 then
+                                 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", CurrentQuestMob, CurrentQuestLevelMob)
+                                 wait(0.5)
+                              elseif getgenv().AutoFarmQuest and getgenv().AutoFarm2 then 
+                                 DoTween(QuestCFrame,getgenv().TweenSpeedQuest)
+                                 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", CurrentQuestMob, CurrentQuestLevelMob)
+                                 wait(0.5)
+                              end
+                           end
+                        end
+                        TPSpecificPlace()
+                        TweenFloat()
+                        Simulation()
+                        FastAttack()
+                        HitBoxPlr()
+                        CheckManually()
+                        DisabledNoClip = true
+                        DoTween(FarmingPlace1)
+                        DisabledNoClip = false
+                        for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                           if not Tweening and not string.find(v.Name,"Boss") and getgenv().AutoFarm2 and v.Name == NameMob then
+                              if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v.Parent and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position-FarmingPlace1.Position).magnitude <= 450 then
+                                 v.HumanoidRootPart.CFrame = FarmingPlace1
+                              end
+                           end
+                        end
+                     end
+                  end
+               until not Alive() or not getgenv().AutoFarm2 
+               CheckManually()
+               DisabledNoClip = false
+            else
+               repeat wait() 
+                  if getgenv().AutoFarm2 then
+                     if game.Workspace.Enemies:FindFirstChild(NameMob) then
+                     else
+                        repeat wait() until
+                        game.Workspace.Enemies:FindFirstChild(NameMob) or not getgenv().AutoFarm2
+                     end
+                     if getgenv().AutoFarm2 then
+                        if getgenv().AutoFarmQuest then
+                           if Alive() and getgenv().AutoFarm2 and (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false or not string.find(game.Players.LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text,CurrentMobName)) then
+                              print(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible)
+                              print(CurrentMobName)
+                              print("--------------")
+                              if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position- Vector3.new(QuestCFrame)).magnitude < 50 then
+                                 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", CurrentQuestMob, CurrentQuestLevelMob)
+                                 wait(0.5)
+                              elseif getgenv().AutoFarmQuest and getgenv().AutoFarm2 then 
+                                 DoTween(QuestCFrame,getgenv().TweenSpeedQuest)
+                                 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", CurrentQuestMob, CurrentQuestLevelMob)
+                                 wait(0.5)
+                              end
+                           end
+                        end
+                        TPSpecificPlace()
+                        TweenFloat()
+                        Simulation()
+                        FastAttack()
+                        HitBoxPlr()
+                        DisabledNoClip = true
+                        DoTween(FarmingPlace1)
+                        DisabledNoClip = false
+                        for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                           if not Tweening and not string.find(v.Name,"Boss") and getgenv().AutoFarm2 and v.Name == NameMob then
+                              if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v.Parent and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position-FarmingPlace1.Position).magnitude <= 350 then
+                                 v.HumanoidRootPart.CFrame = FarmingPlace1
+                                 MobFarming = v
+                              end
+                           end
+                        end
+                        repeat wait()
+                           TweenFloat()
+                        until not MobFarming or not MobFarming.Humanoid or MobFarming.Humanoid.Health <= 0 
+
+                        DisabledNoClip = true
+                        DoTween(FarmingPlace2)
+                        DisabledNoClip = false
+                        TweenFloat()
+                        for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                           if not Tweening and not string.find(v.Name,"Boss") and getgenv().AutoFarm2 and v.Name == NameMob then
+                              if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v.Parent and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position-FarmingPlace2.Position).magnitude <= 350 then
+                                 v.HumanoidRootPart.CFrame = FarmingPlace2
+                                 MobFarming = v
+                              end
+                           end
+                        end
+                        repeat wait()
+                           TweenFloat()
+                        until not MobFarming or not MobFarming.Humanoid or MobFarming.Humanoid.Health <= 0 
+                     end
+                  end
+               until not Alive() or not getgenv().AutoFarm2
+            end
+               
+                  
+
+         else wait(5)
+         end
+      end)
+   end
+   RemoveFloat()
+end)
 AutoFarm:addToggle("Auto Farm Fruit Mastery(Current Support Sea 2,3)",getgenv().AutoFarmFruitMastery,function(boolen)
    getgenv().AutoFarmFruitMastery = boolen
    --Check Level
@@ -1933,20 +2623,6 @@ if FirstSea then
                NoClip = false
                Noclipping:Disconnect()
            end
-            --[[
-               local args = {
-    [1] = "ProQuestProgress"
-}
-
-for i,v in pairs(game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))) do
-if typeof(v) == "Table"then
-for i2,v2 in pairs(v) do
-    print(i2,v2)
-end
-else
-print(i,v)
-end
-end]]--
          end
       end
    end)
@@ -2700,16 +3376,26 @@ AutoStuffs:addToggle("Auto Chest",false,function(boolen)
             table.insert(chests, v)
          end
       end
+      for i,v in pairs(game:GetService("ReplicatedStorage").Unloaded:GetChildren()) do
+         if v.Name == "Chests" then
+            for i,v in pairs(v:GetChildren()) do
+               if string.find(v.Name, "Chest") ~= nil then
+                  table.insert(chests, v)
+               end
+            end
+         end
+      end
       local close = FindNearest(chests)
+      
       if close ~= nil then
          ChestCFrame = CFrame.new(close.CFrame.X,close.CFrame.Y,close.CFrame.Z)
+
          if not moving then
          DoTween(ChestCFrame*CFrame.new(5,0,5),getgenv().TweenSpeedAutoChest)
          end
          wait(0.1)
          
          DoTween(ChestCFrame*CFrame.new(1,0,1),getgenv().TweenSpeedAutoChest)
-         
          
          repeat wait() moving = true game.Players.LocalPlayer.Character.Humanoid:MoveTo(close.Position) until close == nil or close.Parent == nil or getgenv().AutoChest == false
          moving = false
@@ -2780,6 +3466,11 @@ Fruits:addToggle("Get Fruit:Teleport",getgenv().TeleportFruit,function(boolen)
 end)
 local Stats = lib:addPage("Stats")
 local StatsPlr = Stats:addSection("Stats Player")
+MeleePoint = 1
+DefensePoint = 1
+SwordPoint = 1
+DevilFruitPoint = 1
+GunPoint = 1
 local Melee = StatsPlr:addToggle("Auto Add Point Melee",false,function(boolen)
    MeleeStat = boolen
    while MeleeStat do
@@ -4765,6 +5456,7 @@ UISetting:addButton("Save Setting",function()
 end)
 local GameServer = lib:addPage("Game-SV")
 Server = GameServer:addSection("Server")
+
 Server:addSlider("Server Players",ServerPlayers,1,12,function(Value)
    ServerPlayers = Value
 end)
@@ -4781,7 +5473,7 @@ Server:addButton("Find Lowest Players Server",function()
    
    
    if not game:IsLoaded() then
-       print("Game is loading waiting... | Amnesia Empty Server Finder")
+       warn("Game is loading waiting... | Amnesia Empty Server Finder")
    end
    lib:Notify("Lower Server","Credit to Amnesia")
    local maxplayers = math.huge
@@ -4797,7 +5489,7 @@ Server:addButton("Find Lowest Players Server",function()
                goodserver = v.id
            end
        end
-       print("Currently checking the servers with max this number of players : " .. maxplayers .. " | Amnesia Empty Server Finder")
+       warn("Currently checking the servers with max this number of players : " .. maxplayers .. " | Amnesia Empty Server Finder")
    end
    
    function getservers()
@@ -4817,8 +5509,8 @@ Server:addButton("Find Lowest Players Server",function()
    
    getservers()
    
-   print("All of the servers are searched") 
-   print("Server : " .. goodserver .. " Players : " .. maxplayers .. "/" .. serversmaxplayer .. " | Amnesia Empty Server Finder")
+   warn("All of the servers are searched") 
+   warn("Server : " .. goodserver .. " Players : " .. maxplayers .. "/" .. serversmaxplayer .. " | Amnesia Empty Server Finder")
       if CopytoClipboard then
       setclipboard(goodserver)
       end
@@ -4830,9 +5522,16 @@ Server:addButton("Find Lowest Players Server",function()
                   return warn("Your current server is the most empty server atm") 
             end
          end
-         print("AutoTeleport is enabled. Teleporting to : " .. goodserver)
+         warn("AutoTeleport is enabled. Teleporting to : " .. goodserver)
          game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, goodserver)
       end
+end)
+Server:addButton("Set Clip Board JobId(Server Id)",function()
+   setclipboard(game.JobId)
+end)
+Server:addTextbox("Join Server With JobId(Current Sea)","Your Server Id Here(JobId)",function(Value)
+   local JobId = tostring(Value)
+   game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, JobId, game.Players.LocalPlayer)
 end)
 Server:addButton("Rejoin",function()
    game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
