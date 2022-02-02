@@ -107,6 +107,10 @@ for i,v in pairs(getconnections(LP.Idled)) do
    v:Disable()
 end
 --Define getgenv
+getgenv().FlySpeed = 2
+getgenv().FLYING = false
+Fly = false
+--Define getgenv Setting
 getgenv().SilentAimMob = false
 getgenv().SilentAimPlr = false
 getgenv().AutoSaber = false
@@ -205,6 +209,15 @@ function SeatsFunction()
       end
 
    end
+end
+
+function NOFLY()
+	getgenv().FLYING = false
+	if flyKeyDown or flyKeyUp then flyKeyDown:Disconnect() flyKeyUp:Disconnect() end
+	if game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
+		game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
+	end
+	pcall(function() workspace.CurrentCamera.CameraType = Enum.CameraType.Custom end)
 end
 
 function Alive()
@@ -360,7 +373,95 @@ function KillAuraF()
    end   
 end
 
+function getRoot(char)
+	local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
+	return rootPart
+end
+function sFLY(vfly)
+   QEfly = true
+  repeat wait() until game.Players.LocalPlayer and game.Players.LocalPlayer.Character and getRoot(game.Players.LocalPlayer.Character) and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+  repeat wait() until Mouse
+  if flyKeyDown or flyKeyUp then flyKeyDown:Disconnect() flyKeyUp:Disconnect() end
 
+  local T = getRoot(game.Players.LocalPlayer.Character)
+  local CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+  local lCONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+  local SPEED = 50
+
+  local function FLY()
+     getgenv().FLYING = true
+     local BG = Instance.new('BodyGyro')
+     local BV = Instance.new('BodyVelocity')
+     BG.P = 9e4
+     BG.Parent = T
+     BV.Parent = T
+     BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+     BG.cframe = T.CFrame
+     BV.velocity = Vector3.new(0, 0, 0)
+     BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
+     task.spawn(function()
+        repeat wait()
+           if not vfly and game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
+              game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = true
+           end
+           if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
+              SPEED = 50
+           elseif not (CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0) and SPEED ~= 0 then
+              SPEED = 0
+           end
+           if (CONTROL.L + CONTROL.R) ~= 0 or (CONTROL.F + CONTROL.B) ~= 0 or (CONTROL.Q + CONTROL.E) ~= 0 then
+              BV.velocity = ((workspace.CurrentCamera.CoordinateFrame.lookVector * (CONTROL.F + CONTROL.B)) + ((workspace.CurrentCamera.CoordinateFrame * CFrame.new(CONTROL.L + CONTROL.R, (CONTROL.F + CONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) - workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
+              lCONTROL = {F = CONTROL.F, B = CONTROL.B, L = CONTROL.L, R = CONTROL.R}
+           elseif (CONTROL.L + CONTROL.R) == 0 and (CONTROL.F + CONTROL.B) == 0 and (CONTROL.Q + CONTROL.E) == 0 and SPEED ~= 0 then
+              BV.velocity = ((workspace.CurrentCamera.CoordinateFrame.lookVector * (lCONTROL.F + lCONTROL.B)) + ((workspace.CurrentCamera.CoordinateFrame * CFrame.new(lCONTROL.L + lCONTROL.R, (lCONTROL.F + lCONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) - workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
+           else
+              BV.velocity = Vector3.new(0, 0, 0)
+           end
+           BG.cframe = workspace.CurrentCamera.CoordinateFrame
+        until not getgenv().FLYING
+        CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+        lCONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+        SPEED = 0
+        BG:Destroy()
+        BV:Destroy()
+        if game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
+           game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
+        end
+     end)
+  end
+  flyKeyDown = Mouse.KeyDown:Connect(function(KEY)
+     if KEY:lower() == 'w' then
+        CONTROL.F = (vfly and vehicleflyspeed or getgenv().FlySpeed)
+     elseif KEY:lower() == 's' then
+        CONTROL.B = - (vfly and vehicleflyspeed or getgenv().FlySpeed)
+     elseif KEY:lower() == 'a' then
+        CONTROL.L = - (vfly and vehicleflyspeed or getgenv().FlySpeed)
+     elseif KEY:lower() == 'd' then 
+        CONTROL.R = (vfly and vehicleflyspeed or getgenv().FlySpeed)
+     elseif QEfly and KEY:lower() == 'e' then
+        CONTROL.Q = (vfly and vehicleflyspeed or getgenv().FlySpeed)*2
+     elseif QEfly and KEY:lower() == 'q' then
+        CONTROL.E = -(vfly and vehicleflyspeed or getgenv().FlySpeed)*2
+     end
+     pcall(function() workspace.CurrentCamera.CameraType = Enum.CameraType.Track end)
+  end)
+  flyKeyUp = Mouse.KeyUp:Connect(function(KEY)
+     if KEY:lower() == 'w' then
+        CONTROL.F = 0
+     elseif KEY:lower() == 's' then
+        CONTROL.B = 0
+     elseif KEY:lower() == 'a' then
+        CONTROL.L = 0
+     elseif KEY:lower() == 'd' then
+        CONTROL.R = 0
+     elseif KEY:lower() == 'e' then
+        CONTROL.Q = 0
+     elseif KEY:lower() == 'q' then
+        CONTROL.E = 0
+     end
+  end)
+  FLY()
+end
 local function refreshPlayers()
   table.clear(PlayerTable)
   for i,v in pairs(game.Players:GetChildren()) do
@@ -1132,6 +1233,11 @@ LoadSetting()
 
 --Extra Functions
 spawn(function()
+   getgenv().Executed = true
+   wait(9)
+   getgenv().Executed = false
+end)
+spawn(function()
    while game:GetService("RunService").RenderStepped:wait(0.1) do
        pcall(function()
            for i, v in pairs(game:GetService("ReplicatedStorage"):GetChildren()) do
@@ -1240,8 +1346,9 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
       DisabledNoClip = false
       RemoveFloat()
    end
-
+   TimesAutoFarm = 0
    while getgenv().AutoFarm and game:GetService("RunService").RenderStepped:wait() do
+      TimesAutoFarm = TimesAutoFarm + 1
       pcall(function()
          local SmallestDistance = math.huge
          if Alive() then
@@ -1268,8 +1375,15 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
                      end
                   end
                end
+            end   
+            if TimesAutoFarm == 1 then
+               QuestCFrame = nil
             end
-
+            if not FirstSea and TimesAutoFarm > 1 then
+               if OldMobName ~= MobToFarm.Name then
+                  QuestCFrame = nil
+               end
+            end
                   --Check Specific Mobs
                   TPSpecificPlace()
                   --Define Vars
@@ -1285,6 +1399,7 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
                      BringPos = MobToFarm.HumanoidRootPart.Position
                   end
                   DoTween(BringCFrame*CFrame.new(0,30,0),getgenv().TweenSpeedAutoFarm)
+                  TweenFloat()
                   --Set Spawn
                   if getgenv().AutoSetSpawn then
                      if game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").Health > 0 and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and getgenv().AutoFarm and game:GetService("Players").LocalPlayer.Data.SpawnPoint.Value ~= SpawnPoint and CanTween then
@@ -1297,20 +1412,63 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
                      end
                   end
                   --Get Quest
+                  FoundQuest = false
                   if getgenv().AutoFarmQuest then
                      if Alive() and getgenv().AutoFarm and game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false or not string.find(game.Players.LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text,CurrentMobName) then
-                        if not FirstSea then
-                           for i,v in pairs(game:GetService("Workspace").NPCs:GetChildren()) do
-                              if v:FindFirstChild("Head") then
-                                 if v.Head:FindFirstChild("Talk") and v.Head:FindFirstChild("QuestBBG") then
-                                    if v.Head:FindFirstChild("QuestBBG").Title.Text == "QUEST" then
-                                       QuestCFrame = v:FindFirstChild("HumanoidRootPart").CFrame
+                        if HighestLvToFarm ~= 775 and HighestLvToFarm ~= 800 and HighestLvToFarm ~= 700 and HighestLvToFarm ~= 725  then
+                           if not FirstSea and QuestCFrame == nil then
+                              for i,v in pairs(game:GetService("Workspace").NPCs:GetChildren()) do
+                                 if v:FindFirstChild("Head") then
+                                    if v.Head:FindFirstChild("Talk") and v.Head:FindFirstChild("QuestBBG") then
+                                       if v.Head:FindFirstChild("QuestBBG").Title.Text == "QUEST" then
+                                          QuestCFrame = v:FindFirstChild("HumanoidRootPart").CFrame
+                                          FoundQuest = true
+                                       end
                                     end
                                  end
                               end
                            end
+                           if not FoundQuest and getgenv().AutoFarm and QuestCFrame == nil and not FirstSea then
+                              repeat wait()
+                                 local randomnumber = math.random(1,8)
+                                 if randomnumber == 1 and getgenv().AutoFarm then
+                                    DoTween(BringCFrame*CFrame.new(0,20,-500),getgenv().TweenSpeedAutoFarm)
+                                 elseif randomnumber == 2 and getgenv().AutoFarm then
+                                    DoTween(BringCFrame*CFrame.new(0,20,500),getgenv().TweenSpeedAutoFarm)
+                                 elseif randomnumber == 3 and getgenv().AutoFarm then
+                                    DoTween(BringCFrame*CFrame.new(500,20,0),getgenv().TweenSpeedAutoFarm)
+                                 elseif randomnumber == 4 and getgenv().AutoFarm then
+                                    DoTween(BringCFrame*CFrame.new(-500,20,0),getgenv().TweenSpeedAutoFarm)
+                                 elseif randomnumber == 5 and getgenv().AutoFarm then
+                                    DoTween(BringCFrame*CFrame.new(-500,20,500),getgenv().TweenSpeedAutoFarm)
+                                 elseif randomnumber == 6 and getgenv().AutoFarm then
+                                    DoTween(BringCFrame*CFrame.new(500,20,-500),getgenv().TweenSpeedAutoFarm)
+                                 elseif randomnumber == 7 and getgenv().AutoFarm then
+                                    DoTween(BringCFrame*CFrame.new(-500,20,-500),getgenv().TweenSpeedAutoFarm)
+                                 elseif randomnumber == 8 and getgenv().AutoFarm then
+                                    DoTween(BringCFrame*CFrame.new(500,20,500),getgenv().TweenSpeedAutoFarm)
+                                 end
+                                 for i,v in pairs(game:GetService("Workspace").NPCs:GetChildren()) do
+                                    if v:FindFirstChild("Head") then
+                                       if v.Head:FindFirstChild("Talk") and v.Head:FindFirstChild("QuestBBG") then
+                                          if v.Head:FindFirstChild("QuestBBG").Title.Text == "QUEST" then
+                                             QuestCFrame = v:FindFirstChild("HumanoidRootPart").CFrame
+                                             OldMobName = MobToFarm.Name
+                                             FoundQuest = true
+                                          end
+                                       end
+                                    end
+                                 end
+                              until FoundQuest or not getgenv().AutoFarm
+                           end
+                        end
+                        if HighestLvToFarm == 800 and HighestLvToFarm == 775 then
+                           QuestCFrame = CFrame.new(638.65856933594, 73.07054901123, 914.59094238281)
+                        elseif HighestLvToFarm == 700 or HighestLvToFarm == 725 then
+                           QuestCFrame = CFrame.new(-425.76028442383, 72.970527648926, 1837.8195800781)
                         end
                         DoTween(QuestCFrame,getgenv().TweenSpeedQuest)
+                        TweenFloat()
                         wait(0.1)
                         if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position- Vector3.new(QuestCFrame)).magnitude < 50 then
                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", CurrentQuestMob, CurrentQuestLevelMob)
@@ -1326,6 +1484,7 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
                   if MobToFarm.Parent and MobToFarm:FindFirstChild("Humanoid") and MobToFarm:FindFirstChild("Humanoid").Health > 0 and  MobToFarm:FindFirstChild("HumanoidRootPart") ~= nil and Alive() and getgenv().AutoFarm then
                      DisabledNoClip = true
                      DoTween(MobToFarm.HumanoidRootPart.CFrame * CFrame.new(0,20,10),getgenv().TweenSpeedAutoFarm)
+                     TweenFloat()
                      DisabledNoClip = false
                   end
                   
@@ -1381,6 +1540,7 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
                                           HumanoidRootPart.CFrame = MobToFarm.HumanoidRootPart.CFrame * CFrame.new(0, 20, 10)
                                        else
                                           DoTween(MobToFarm.HumanoidRootPart.CFrame * CFrame.new(0,20,10),getgenv().TweenSpeedAutoFarm)
+                                          TweenFloat()
                                        end
                                     end
 
@@ -1390,9 +1550,10 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
                                  MobToFarm.HumanoidRootPart.CFrame = OldCFrame
                                  wait(1)
                                  DoTween(MobToFarm.HumanoidRootPart.CFrame * CFrame.new(0,20,10),getgenv().TweenSpeedAutoFarm)
+                                 TweenFloat()
                               end
                            elseif getgenv().AutoFarm then
-                              randomnumber = math.random(1,3)
+                              local randomnumber = math.random(1,3)
                               if randomnumber == 1 then
                                  HumanoidRootPart.CFrame = MobToFarm.HumanoidRootPart.CFrame * CFrame.new(0, 0, 30)      
                               elseif randomnumber ==2 then
@@ -1407,8 +1568,10 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
                            BringCFrame = MobToFarm.HumanoidRootPart.CFrame
                            BringPos = MobToFarm.HumanoidRootPart.Position
                            DoTween(MobToFarm.HumanoidRootPart.CFrame,getgenv().TweenSpeedAutoFarm)
+                           TweenFloat()
                            if MobToFarm.Parent and MobToFarm:FindFirstChild("Humanoid") and MobToFarm:FindFirstChild("HumanoidRootPart") ~= nil and Alive() and MobToFarm:FindFirstChild("Humanoid").Health > 0 and (MobToFarm.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude > 300 then
                               DoTween(MobToFarm.HumanoidRootPart.CFrame,getgenv().TweenSpeedAutoFarm)
+                              TweenFloat()
                            end
                         end
                         DoMagnet = true
@@ -1425,7 +1588,7 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
    end
    RemoveFloat()
 end)
-AutoFarm:addToggle("Auto Farm v2",getgenv().AutoFarm2,function(boolen)
+AutoFarm:addToggle("Auto Farm v2(WIP)",getgenv().AutoFarm2,function(boolen)
    getgenv().AutoFarm2  = boolen
    --Check Quest
       CheckManually()
@@ -1461,7 +1624,7 @@ AutoFarm:addToggle("Auto Farm v2",getgenv().AutoFarm2,function(boolen)
             FastAttack()
             TweenFloat()
             --Set Spawn
-            if getgenv().AutoSetSpawn then
+            if getgenv().AutoSetSpawn and getgenv().AutoFarm2 and Alive() then
                if game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").Health > 0 and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and getgenv().AutoFarm and game:GetService("Players").LocalPlayer.Data.SpawnPoint.Value ~= SpawnPoint and CanTween then
                   DoTween(SpawnCFrame,getgenv().TweenSpeedTeleportPlace)
                   local args = {
@@ -1475,9 +1638,6 @@ AutoFarm:addToggle("Auto Farm v2",getgenv().AutoFarm2,function(boolen)
             wait(0.1)
             if getgenv().AutoFarmQuest then
                if Alive() and getgenv().AutoFarm2 and (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false or not string.find(game.Players.LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text,CurrentMobName)) then
-                  print(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible)
-                  print(CurrentMobName)
-                  print("--------------")
                   if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position- Vector3.new(QuestCFrame)).magnitude < 50 then
                      game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", CurrentQuestMob, CurrentQuestLevelMob)
                      wait(0.5)
@@ -1490,7 +1650,7 @@ AutoFarm:addToggle("Auto Farm v2",getgenv().AutoFarm2,function(boolen)
             end
             if FarmingPlace2 == nil then
                repeat wait() 
-                  if getgenv().AutoFarm2 then
+                  if getgenv().AutoFarm2 and Alive()  then
                      if game.Workspace.Enemies:FindFirstChild(NameMob) then
                      else
                         repeat wait() until
@@ -1499,9 +1659,6 @@ AutoFarm:addToggle("Auto Farm v2",getgenv().AutoFarm2,function(boolen)
                      if getgenv().AutoFarm2 then
                         if getgenv().AutoFarmQuest then
                            if Alive() and getgenv().AutoFarm2 and (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false or not string.find(game.Players.LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text,CurrentMobName)) then
-                              print(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible)
-                              print(CurrentMobName)
-                              print("--------------")
                               if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position- Vector3.new(QuestCFrame)).magnitude < 50 then
                                  game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", CurrentQuestMob, CurrentQuestLevelMob)
                                  wait(0.5)
@@ -1512,19 +1669,21 @@ AutoFarm:addToggle("Auto Farm v2",getgenv().AutoFarm2,function(boolen)
                               end
                            end
                         end
-                        TPSpecificPlace()
-                        TweenFloat()
-                        Simulation()
-                        FastAttack()
-                        HitBoxPlr()
-                        CheckManually()
-                        DisabledNoClip = true
-                        DoTween(FarmingPlace1)
-                        DisabledNoClip = false
-                        for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                           if not Tweening and not string.find(v.Name,"Boss") and getgenv().AutoFarm2 and v.Name == NameMob then
-                              if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v.Parent and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position-FarmingPlace1.Position).magnitude <= 450 then
-                                 v.HumanoidRootPart.CFrame = FarmingPlace1
+                        if getgenv().AutoFarm2 and Alive() then
+                           TPSpecificPlace()
+                           TweenFloat()
+                           Simulation()
+                           FastAttack()
+                           HitBoxPlr()
+                           CheckManually()
+                           DisabledNoClip = true
+                           DoTween(FarmingPlace1*CFrame.new(0,20,0))
+                           DisabledNoClip = false
+                           for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                              if not Tweening and not string.find(v.Name,"Boss") and getgenv().AutoFarm2 and v.Name == NameMob then
+                                 if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v.Parent and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position-FarmingPlace1.Position).magnitude <= 450 then
+                                    v.HumanoidRootPart.CFrame = FarmingPlace1
+                                 end
                               end
                            end
                         end
@@ -1544,9 +1703,6 @@ AutoFarm:addToggle("Auto Farm v2",getgenv().AutoFarm2,function(boolen)
                      if getgenv().AutoFarm2 then
                         if getgenv().AutoFarmQuest then
                            if Alive() and getgenv().AutoFarm2 and (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false or not string.find(game.Players.LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text,CurrentMobName)) then
-                              print(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible)
-                              print(CurrentMobName)
-                              print("--------------")
                               if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position- Vector3.new(QuestCFrame)).magnitude < 50 then
                                  game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", CurrentQuestMob, CurrentQuestLevelMob)
                                  wait(0.5)
@@ -1557,41 +1713,42 @@ AutoFarm:addToggle("Auto Farm v2",getgenv().AutoFarm2,function(boolen)
                               end
                            end
                         end
-                        TPSpecificPlace()
-                        TweenFloat()
-                        Simulation()
-                        FastAttack()
-                        HitBoxPlr()
-                        DisabledNoClip = true
-                        DoTween(FarmingPlace1)
-                        DisabledNoClip = false
-                        for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                           if not Tweening and not string.find(v.Name,"Boss") and getgenv().AutoFarm2 and v.Name == NameMob then
-                              if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v.Parent and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position-FarmingPlace1.Position).magnitude <= 350 then
-                                 v.HumanoidRootPart.CFrame = FarmingPlace1
-                                 MobFarming = v
+                        if getgenv().AutoFarm2 and Alive()  then
+                           TPSpecificPlace()
+                           TweenFloat()
+                           Simulation()
+                           FastAttack()
+                           HitBoxPlr()
+                           DisabledNoClip = true
+                           DoTween(FarmingPlace1*CFrame.new(0,20,0))
+                           DisabledNoClip = false
+                           for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                              if not Tweening and not string.find(v.Name,"Boss") and getgenv().AutoFarm2 and v.Name == NameMob then
+                                 if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v.Parent and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position-FarmingPlace1.Position).magnitude <= 359 then
+                                    v.HumanoidRootPart.CFrame = FarmingPlace1
+                                    MobFarming = v
+                                 end
                               end
                            end
-                        end
-                        repeat wait()
-                           TweenFloat()
-                        until not MobFarming or not MobFarming.Humanoid or MobFarming.Humanoid.Health <= 0 
+                           repeat wait()
+                              TweenFloat()
+                           until not MobFarming or not MobFarming.Humanoid or MobFarming.Humanoid.Health <= 0 
 
-                        DisabledNoClip = true
-                        DoTween(FarmingPlace2)
-                        DisabledNoClip = false
-                        TweenFloat()
-                        for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                           if not Tweening and not string.find(v.Name,"Boss") and getgenv().AutoFarm2 and v.Name == NameMob then
-                              if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v.Parent and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position-FarmingPlace2.Position).magnitude <= 350 then
-                                 v.HumanoidRootPart.CFrame = FarmingPlace2
-                                 MobFarming = v
+                           DisabledNoClip = true
+                           DoTween(FarmingPlace2*CFrame.new(0,20,0))
+                           DisabledNoClip = false
+                           TweenFloat()
+                           for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                              if not Tweening and not string.find(v.Name,"Boss") and getgenv().AutoFarm2 and v.Name == NameMob then
+                                 if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v.Parent and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position-FarmingPlace2.Position).magnitude <= 350 then
+                                    v.HumanoidRootPart.CFrame = FarmingPlace2
+                                    MobFarming = v
+                                 end
                               end
                            end
+                           repeat wait()
+                           until not MobFarming or not MobFarming.Humanoid or MobFarming.Humanoid.Health <= 0 or not getgenv().AutoFarm2
                         end
-                        repeat wait()
-                           TweenFloat()
-                        until not MobFarming or not MobFarming.Humanoid or MobFarming.Humanoid.Health <= 0 
                      end
                   end
                until not Alive() or not getgenv().AutoFarm2
@@ -1603,6 +1760,8 @@ AutoFarm:addToggle("Auto Farm v2",getgenv().AutoFarm2,function(boolen)
          end
       end)
    end
+   RemoveFloat()
+   wait(1)
    RemoveFloat()
 end)
 AutoFarm:addToggle("Auto Farm Fruit Mastery(Current Support Sea 2,3)",getgenv().AutoFarmFruitMastery,function(boolen)
@@ -2120,7 +2279,7 @@ AutoFarmBoss:addToggle("Kill Boss",false,function(boolen)
                            DoTween(v.HumanoidRootPart.CFrame * CFrame.new(0,20,10),getgenv().TweenSpeedAutoFarm)
                         end
                      elseif getgenv().KillingBoss then
-                        randomnumber = math.random(1,3)
+                        local randomnumber = math.random(1,3)
                         if randomnumber == 1 then
                            HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 30)      
                         elseif randomnumber ==2 then
@@ -2144,6 +2303,24 @@ AutoFarmBoss:addToggle("Kill Boss",false,function(boolen)
       end
    end
    RemoveFloat()
+end)
+AutoFarmBoss:addToggle("Silent Aim Boss",false,function(boolen)
+   getgenv().SilentAimBoss = boolen
+   while getgenv().SilentAimBoss and wait() do
+      for i,v in pairs(game.Workspace.Enemies:GetChildren()) do
+         if v.Name == getgenv().ChosenBoss and v and v.Humanoid and v.HumanoidRootPart then
+            if v.Humanoid.Health > 0 then
+               print()
+               getgenv().SilentAimMob = true
+               MobSilent = v
+            end
+         end
+      end
+   end
+   if not getgenv().SilentAimBoss then
+      getgenv().SilentAimMob = false
+      MobSilent = nil
+   end
 end)
 AutoFarmBoss:addButton("Refresh Boss",function()
    AutoFarmBoss:updateDropdown(BossDropdown,"Refresh Boss",refreshBosses(),function()
@@ -2270,7 +2447,7 @@ if SecondSea then
                                              DoTween(v.HumanoidRootPart.CFrame * CFrame.new(0,20,0),getgenv().TweenSpeedAutoFarm)
                                           end
                                        else
-                                          randomnumber = math.random(1,3)
+                                          local randomnumber = math.random(1,3)
                                           if randomnumber == 1 and getgenv().AutoEctoplasm  then
                                              TweenFloat()
                                              game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 30)      
@@ -2390,7 +2567,7 @@ if ThirdSea then
                                           Tweeeing = false
                                        end
                                     else
-                                        randomnumber = math.random(1,3)
+                                        local randomnumber = math.random(1,3)
                                        if randomnumber == 1 and getgenv().AutoFarmBone  then
                                           game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 30)      
                                        elseif randomnumber ==2 and getgenv().AutoFarmBone   then
@@ -2832,7 +3009,7 @@ if SecondSea then
                                           Tweeeing = false
                                        end
                                     else
-                                       randomnumber = math.random(1,3)
+                                       local randomnumber = math.random(1,3)
                                        if randomnumber == 1 and getgenv().AutoFarm  then
                                           game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 30)      
                                        elseif randomnumber ==2 and getgenv().AutoFarm   then
@@ -3096,7 +3273,7 @@ if ThirdSea then
                                  Tweeeing = false
                               end
                            else
-                              randomnumber = math.random(1,3)
+                              local randomnumber = math.random(1,3)
                               if randomnumber == 1 and getgenv().AutoCitizenQuest  then
                                  game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 30)      
                               elseif randomnumber ==2 and getgenv().AutoCitizenQuest   then
@@ -3532,7 +3709,7 @@ local DevilFruit = StatsPlr:addToggle("Auto Add Point DevilFruit",false,function
       if game.Players.localPlayer.Data.Points.Value >= DevilFruitPoint then
          local args = {
             [1] = "AddPoint",
-            [2] = "DevilFruit",
+            [2] = "Demon Fruit",
             [3] = DevilFruitPoint
          }
          game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
@@ -4236,6 +4413,25 @@ end)
 local LocalPlayerPage = lib:addPage("Local Player")
 
 local LocalPlayerSection = LocalPlayerPage:addSection("Local Player Functions")
+LocalPlayerSection:addToggle("Fly(IY)",getgenv().Fly,function(Value)
+   Fly = Value
+   if not Fly then
+      NOFLY()
+   end
+end)
+LocalPlayerSection:addKeybind("Fly KeyBind",Enum.KeyCode.B,function()
+   if Fly then
+      getgenv().IYFly = not getgenv().IYFly
+      if getgenv().IYFly then
+         sFLY()
+      else
+         NOFLY()
+      end
+   end
+end)
+LocalPlayerSection:addSlider("Fly Speed",getgenv().FlySpeed,1,20,function(Value)
+   getgenv().FlySpeed = Value
+end)
 LocalPlayerSection:addButton("Infinity Geppo",function(boolen)
    for i,v in next, getgc() do
       if game.Players.LocalPlayer.Character.Geppo then
@@ -4489,7 +4685,7 @@ if SecondSea then
                               DoTween(LawBoss.HumanoidRootPart.CFrame * CFrame.new(0,20,10),getgenv().TweenSpeedAutoFarm)
                            end
                         elseif getgenv().FullyAutolawRaid then
-                           randomnumber = math.random(1,3)
+                           local randomnumber = math.random(1,3)
                            if randomnumber == 1 then
                               HumanoidRootPart.CFrame = LawBoss.HumanoidRootPart.CFrame * CFrame.new(0, 0, 30)      
                            elseif randomnumber ==2 then
@@ -5705,6 +5901,15 @@ GameSection:addButton("FPS Boost",function()
    for i, e in pairs(l:GetChildren()) do
       if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
          e.Enabled = false
+      end
+   end
+end)
+spawn(function()
+   wait(10)
+   while wait() do
+      if getgenv().Executed then
+         Fly = false
+         break
       end
    end
 end)
