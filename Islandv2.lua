@@ -238,15 +238,20 @@ function Click()
    pcall(function()
       if Alive() then
          --ClickMod.activeController:attack()
-         VirtualUser:CaptureController()
-         VirtualUser:ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+         if not getgenv().Clicked then
+            getgenv().Clicked = true
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+            game:GetService("RunService").RenderStepped:wait()
+            getgenv().Clicked = false
+         end
       end
    end)
 end
 function Equip(Tool)
    pcall(function()
       spawn(function()
-         local ToolEquip =  game.Players.LocalPlayer.Backpack:FindFirstChild(Tool)
+         local ToolEquip = game.Players.LocalPlayer.Backpack:FindFirstChild(Tool) or game.Players.LocalPlayer.Character:FindFirstChild(Tool)
          if Humanoid then
             Humanoid:EquipTool(ToolEquip)
          end
@@ -1376,12 +1381,14 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
                   end
                end
             end   
-            if TimesAutoFarm == 1 then
-               QuestCFrame = nil
-            end
-            if not FirstSea and TimesAutoFarm > 1 then
-               if OldMobName ~= MobToFarm.Name then
+            if not FirstSea then
+               if TimesAutoFarm == 1 then
                   QuestCFrame = nil
+               end
+               if TimesAutoFarm > 1 then
+                  if OldMobName ~= MobToFarm.Name then
+                     QuestCFrame = nil
+                  end
                end
             end
                   --Check Specific Mobs
@@ -2326,7 +2333,7 @@ AutoFarmBoss:addButton("Refresh Boss",function()
    AutoFarmBoss:updateDropdown(BossDropdown,"Refresh Boss",refreshBosses(),function()
    end)
 end)
-local AutoWeapon = MainPage:addSection("Auto Equip Weapon")
+local AutoWeapon = MainPage:addSection("Auto Equip")
 
 local WeaponDropdown = AutoWeapon:addDropdown("Select A Weapon",PLrWeapons,function(Value)
    Weapon = Value
@@ -2334,6 +2341,41 @@ end)
 AutoWeapon:addButton("Refresh Weapon Dropdown",function()
    AutoWeapon:updateDropdown(WeaponDropdown,"Refresh Weapon",refreshWeapon1(),function()
    end)
+end)
+AutoWeapon:addToggle("Auto Equip Accessory",false,function(boolen)
+   getgenv().AutoAccessory = boolen
+   while getgenv().AutoAccessory and wait() do
+      if Alive() then
+         for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+            if v.ToolTip == "Wear" then
+               WearName = v.Name
+               WearName2 = v.Name:gsub(" ","")
+               WearTool = v
+            end
+         end
+         for i,v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+            if v:IsA("Tool") and v.ToolTip == "Wear" then
+               WearName = v.Name
+               WearName2 = v.Name:gsub(" ","")
+               WearTool = v
+            end
+         end
+         WornTool = false
+         if game.Players.LocalPlayer.Character:FindFirstChild(WearName2) then
+               WornTool = true
+         end
+         if not WornTool then
+            if not game.Players.LocalPlayer.Character:FindFirstChild(WearName) then
+               game.Players.LocalPlayer.Character.Humanoid:EquipTool(WearTool)
+               wait()
+            end
+      
+      
+            WearTool.RemoteFunction:InvokeServer()
+         end
+      else wait(5)
+      end
+   end
 end)
 local AutoFarmEvent = MainPage:addSection("Auto Farm Event")
 if SecondSea then
