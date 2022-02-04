@@ -242,11 +242,12 @@ end
 function Click()
    pcall(function()
       if Alive() then
-         --ClickMod.activeController:attack()
+         --
          if not getgenv().Clicked then
             getgenv().Clicked = true
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+            --VirtualUser:CaptureController()
+            --VirtualUser:ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+            ClickMod.activeController:attack()
             game:GetService("RunService").RenderStepped:wait()
             getgenv().Clicked = false
          end
