@@ -104,8 +104,11 @@ LP.Idled:connect(function()
    VirtualUser:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
 end)
 --Anti AFK V2
-for i,v in pairs(getconnections(LP.Idled)) do
-   v:Disable()
+if not getgenv().AFKDISABLED then
+   for i,v in pairs(getconnections(LP.Idled)) do
+      v:Disable()
+      getgenv().AFKDISABLED = true
+   end
 end
 --Define getgenv
 getgenv().FlySpeed = 2
@@ -1713,6 +1716,92 @@ elseif ThirdSea then
 elseif FirstSea then
    MaxLevelSea = 675
 end
+spawn(function()
+   while game:GetService("RunService").RenderStepped:wait() do
+      if getgenv().ObservationFarm and game.Players.LocalPlayer.PlayerGui:FindFirstChild("ScreenGui") ~= nil then
+         VirtualUser:CaptureController()
+         VirtualUser:SetKeyDown('0x65')
+         wait(2)
+         VirtualUser:SetKeyUp('0x65')
+         if FirstSea then
+            if game.Workspace.Enemies:FindFirstChild("Galley Captain [Lv. 650]") then
+               if game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel") then
+                  DoTween(game.Workspace.Enemies:FindFirstChild("Galley Captain [Lv. 650]").HumanoidRootPart.CFrame,getgenv().TweenSpeedAutoFarm)
+                  repeat game:GetService("RunService").RenderStepped:wait()
+                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Workspace.Enemies:FindFirstChild("Galley Captain [Lv. 650]").HumanoidRootPart.CFrame * CFrame.new(3,0,0)
+                  until getgenv().Observation == false or not game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel")
+               else
+                  DoTween(game.Workspace.Enemies:FindFirstChild("Galley Captain [Lv. 650]").HumanoidRootPart.CFrame,getgenv().TweenSpeedAutoFarm)
+                  TweenFloat()
+                  repeat game:GetService("RunService").RenderStepped:wait()
+                     if not  game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel") then
+                        TweenFloat()
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Workspace.Enemies:FindFirstChild("Galley Captain [Lv. 650]").HumanoidRootPart.CFrame * CFrame.new(30,30,0)
+   
+                        VirtualUser:CaptureController()
+                        VirtualUser:SetKeyDown('0x65')
+                        VirtualUser:SetKeyUp('0x65')
+                     end
+                  until getgenv().Observation == false or game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel")
+                  RemoveFloat()
+               end
+            else DoTween(CFrame.new(5533.29785, 88.1079102, 4852.3916,getgenv().TweenSpeedAutoFarm))
+            end
+         elseif SecondSea then
+            if game.Workspace.Enemies:FindFirstChild("Snow Lurker [Lv. 1375]") then
+               if game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel") then
+                  DoTween(game.Workspace.Enemies:FindFirstChild("Snow Lurker [Lv. 1375]").HumanoidRootPart.CFrame,getgenv().TweenSpeedAutoFarm)
+                  repeat game:GetService("RunService").RenderStepped:wait()
+                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Workspace.Enemies:FindFirstChild("Snow Lurker [Lv. 1375]").HumanoidRootPart.CFrame * CFrame.new(3,0,0)
+                  until getgenv().Observation == false or not game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel")
+               else
+                  DoTween(game.Workspace.Enemies:FindFirstChild("Snow Lurker [Lv. 1375]").HumanoidRootPart.CFrame,getgenv().TweenSpeedAutoFarm)
+                  TweenFloat()
+                  repeat game:GetService("RunService").RenderStepped:wait()
+                     if not  game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel") then
+                        TweenFloat()
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Workspace.Enemies:FindFirstChild("Snow Lurker [Lv. 1375]").HumanoidRootPart.CFrame * CFrame.new(30,30,0)
+   
+                        VirtualUser:CaptureController()
+                        VirtualUser:SetKeyDown('0x65')
+                        VirtualUser:SetKeyUp('0x65')
+                     end
+                  until getgenv().Observation == false or game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel")
+                  RemoveFloat()
+               end
+            else
+               DoTween(CFrame.new(5496.42236, 28.8430767, -6766.56787),getgenv().TweenSpeedAutoFarm)
+            end
+         elseif ThirdSea then
+            if game.Workspace.Enemies:FindFirstChild("Marine Commodore [Lv. 1700]") then
+               if game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel") then
+                  DoTween(game.Workspace.Enemies:FindFirstChild("Marine Commodore [Lv. 1700]").HumanoidRootPart.CFrame,getgenv().TweenSpeedAutoFarm)
+                  repeat game:GetService("RunService").RenderStepped:wait()
+                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Workspace.Enemies:FindFirstChild("Marine Commodore [Lv. 1700]").HumanoidRootPart.CFrame * CFrame.new(3,0,0)
+                  until getgenv().Observation == false or not game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel")
+               else
+                  DoTween(game.Workspace.Enemies:FindFirstChild("Marine Commodore [Lv. 1700]").HumanoidRootPart.CFrame,getgenv().TweenSpeedAutoFarm)
+                  TweenFloat()
+                  repeat game:GetService("RunService").RenderStepped:wait()
+                     if not  game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel") then
+                        TweenFloat()
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Workspace.Enemies:FindFirstChild("Marine Commodore [Lv. 1700]").HumanoidRootPart.CFrame * CFrame.new(30,30,0)
+   
+                        VirtualUser:CaptureController()
+                        VirtualUser:SetKeyDown('0x65')
+                        VirtualUser:SetKeyUp('0x65')
+                     end
+                  until getgenv().Observation == false or game.Players.LocalPlayer.PlayerGui.ScreenGui:FindFirstChild("ImageLabel")
+                  RemoveFloat()
+               end
+            else DoTween(CFrame.new(5533.29785, 88.1079102, 4852.3916,getgenv().TweenSpeedAutoFarm))
+            end
+         end
+      end
+   end
+
+end)
+
 --Get Boss
 for i,v in pairs(require(game:GetService("ReplicatedStorage").Quests)) do
    local PlrLevel = game.Players.localPlayer.Data.Level.Value
@@ -4146,6 +4235,9 @@ AutoStuffs:addToggle("Auto Chest",false,function(boolen)
          moving = false
       end
    end
+end)
+AutoStuffs:addToggle("Auto Observation Farm",false,function(boolen)
+   getgenv().ObservationFarm = boolen
 end)
 if ThirdSea then
    AutoStuffs:addButton("Auto Do Haki Color Puzzle",function()
