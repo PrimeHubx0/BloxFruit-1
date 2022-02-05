@@ -1688,6 +1688,31 @@ spawn(function()
        end)
    end
 end)
+spawn(function()
+   while wait() do
+      if getgenv().AutoBuyEnhancement then
+         if MyFragment >= 1500 then
+            local args = {[1] = "ColorsDealer",[2] = "1"}
+            if game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args)) ~= nil and game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args)) ~= "" then
+               local args = {[1] = "ColorsDealer",[2] = "2"}
+               game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+            end
+         end 
+      end
+   end
+end)
+spawn(function()   
+   while wait() do
+      if getgenv().AutoBuyLegendarySword then
+         if MyBeli>= 2000000 then
+            if game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Manager","2") == "Hey, I just saw him! He told me he would be in the area for 5 minutes. Good luck!" then
+               local args = {[1] = "LegendarySwordDealer",[2] = "2"}
+               game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+            end
+         end
+      end
+   end
+end)
 for i,v in pairs(LP.Backpack:GetChildren()) do  
    if v:IsA("Tool") then
        table.insert(PLrWeapons ,v.Name)
@@ -4202,6 +4227,18 @@ if ThirdSea then
 end
 
 local AutoStuffs = MainPage:addSection("Auto Other Stuffs")
+if SecondSea then
+   AutoStuffs:addToggle("Auto Buy Legendary Sword",getgenv().AutoBuyLegendarySword,function(Value)
+      getgenv().AutoBuyLegendarySword = Value
+   end)
+end
+
+--Enhancement
+if SecondSea or ThirdSea then
+   AutoStuffs:addToggle("Auto Buy Enhancement",getgenv().AutoBuyEnhancement,function(Value) 
+      getgenv().AutoBuyEnhancement = Value   
+   end)
+end
 AutoStuffs:addToggle("Auto Chest",false,function(boolen)
    getgenv().AutoChest = boolen
    while getgenv().AutoChest and wait() do
@@ -5071,6 +5108,26 @@ Pvp:addToggle("Spectate",getgenv().Spec,function(boolen)
       game.Workspace.Camera.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
    end
 end)
+Pvp:addToggle("HitBox Toggle",false,function(v)
+   getgenv().Hitboxv = v
+   while getgenv().Hitboxv do
+      wait()
+      pcall(function()
+         local PlrKill = game.Players:FindFirstChild(SelectedPlayer)
+         if PlrKill ~=nil then
+         PlrToKill = PlrKill.Character
+         end
+         if PlrToKill~= nil then
+            PlrToKill.HumanoidRootPart.Size = Vector3.new(Hitboxi,Hitboxi,Hitboxi)
+         end
+      end)
+   end
+end)
+Hitboxi = 10
+Pvp:addSlider("HitBox Extender",10,1,60,function(v)
+   Hitboxi = v
+ end)
+
 local LocalPlayerPage = lib:addPage("Local Player")
 
 local LocalPlayerSection = LocalPlayerPage:addSection("Local Player Functions")
@@ -5202,29 +5259,26 @@ LocalPlayerSection:addToggle("No Stun",getgenv().NoStun,function(boolen)
       end
    end
 end)
-LocalPlayerSection:addToggle("Set Range Observation",getgenv().BoolenRangeObservation,function(boolen)
-   getgenv().BoolenRangeObservation = boolen
+LocalPlayerSection:addToggle("Inf Range Observation",getgenv().InfRangeObservation,function(boolen)
+   getgenv().InfRangeObservation = boolen
    local player = game.Players.LocalPlayer
    local char = player.Character
-   local VisionRadius = player.VisionRadius
    local VS = game.Players.LocalPlayer.VisionRadius.Value
-   if not getgenv().BoolenRangeObservation then
-      VisionRadius.Value = VS
-   end
-   while getgenv().BoolenRangeObservation do
+
+   while getgenv().InfRangeObservation do
       wait()
       if player then
          if char.Humanoid.Health <= 0 then 
             wait(5) 
          end
-         VisionRadius.Value = getgenv().RangeObservation
+         game.Players.LocalPlayer.VisionRadius.Value = math.huge
       end
+   end
+   if not getgenv().InfRangeObservation then
+      game.Players.LocalPlayer.VisionRadius.Value= 3000
    end
 end)
 
-LocalPlayerSection:addSlider("Range Observation",0,0,25000,function(Value)
-   getgenv().RangeObservation = Value
-end)
 LocalPlayerSection:addSlider("WalkSpeed",game.Players.LocalPlayer.Character.Humanoid.WalkSpeed,30,500,function(Value)
    game.Players.LocalPlayer.Character.Movement.Disabled = true
    local WalkSpeedValue = Value
@@ -6329,12 +6383,84 @@ Server = GameServer:addSection("Server")
 Server:addSlider("Server Players",ServerPlayers,1,12,function(Value)
    ServerPlayers = Value
 end)
-
-Server:addButton("Server Hop",function()
+Server:addButton("Server Hop(Working?)",function()
+   lib:Notify("Server Hop","Credit to Charwar") 
+   local PlaceID = game.PlaceId
+   local AllIDs = {}
+   local foundAnything = ""
+   local actualHour = os.date("!*t").hour
+   local Deleted = false
+   local File = pcall(function()
+       AllIDs = game:GetService('HttpService'):JSONDecode(readfile("NotSameServers.json"))
+   end)
+   if not File then
+       table.insert(AllIDs, actualHour)
+       writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
+   end
+   function TPReturner()
+       local Site;
+       if foundAnything == "" then
+           Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
+       else
+           Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+       end
+       local ID = ""
+       if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+           foundAnything = Site.nextPageCursor
+       end
+       local num = 0;
+       for i,v in pairs(Site.data) do
+           local Possible = true
+           ID = tostring(v.id)
+           if tonumber(v.maxPlayers) > tonumber(v.playing) then
+               for _,Existing in pairs(AllIDs) do
+                   if num ~= 0 then
+                       if ID == tostring(Existing) then
+                           Possible = false
+                       end
+                   else
+                       if tonumber(actualHour) ~= tonumber(Existing) then
+                           local delFile = pcall(function()
+                               delfile("NotSameServers.json")
+                               AllIDs = {}
+                               table.insert(AllIDs, actualHour)
+                           end)
+                       end
+                   end
+                   num = num + 1
+               end
+               if Possible == true then
+                   table.insert(AllIDs, ID)
+                   wait()
+                   pcall(function()
+                       writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
+                       wait()
+                       game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
+                   end)
+                   wait(4)
+               end
+           end
+       end
+   end
+   
+   function Teleport()
+       while wait() do
+           pcall(function()
+               TPReturner()
+               if foundAnything ~= "" then
+                   TPReturner()
+               end
+           end)
+       end
+   end
+   
+   Teleport()
+end)
+Server:addButton("Server Hop(Patched)",function()
    LowestServer()
    lib:Notify("Server Hop","Done Searching : No Server Found") 
 end)
-Server:addButton("Find Lowest Players Server",function()
+Server:addButton("Find Lowest Players Server(Patched)",function()
 
    getgenv().AutoTeleport = true
    getgenv().DontTeleportTheSameNumber = true 
