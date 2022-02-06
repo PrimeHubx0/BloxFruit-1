@@ -4469,7 +4469,7 @@ end)
 Fruits:addDropdown("Select Auto Buy Devil Fruit In Shop",FruitTable,function(Value) 
    SelectedFruit = Value
 end)
-DF:addToggle("Auto Buy Devil Fruit In Shop",false,function(Value)
+Fruits:addToggle("Auto Buy Devil Fruit In Shop",false,function(Value)
    AutoBuyFruit = Value
    if SelectedFruit == "" and AutoBuyFruit then
       lib:Notify("Auto Buy Devil Fruit In Shop","Pls Select a Fruit")
