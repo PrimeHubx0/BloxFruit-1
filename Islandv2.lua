@@ -6331,7 +6331,17 @@ Server:addSlider("Server Players",ServerPlayers,1,12,function(Value)
 end)
 
 Server:addButton("Server Hop",function()
-   LowestServer()
+   wait()
+if game.PlaceId == 1696916806 then
+game:GetService("TeleportService"):Teleport(2753915549, game:GetService("Players").LocalPlayer)
+
+else
+game:GetService("TeleportService"):Teleport(1696916806, game:GetService("Players").LocalPlayer)
+end
+queue_on_teleport([[
+wait(5)
+game:GetService("TeleportService"):Teleport(2753915549, game:GetService("Players").LocalPlayer)
+]])
    lib:Notify("Server Hop","Done Searching : No Server Found") 
 end)
 Server:addButton("Find Lowest Players Server",function()
