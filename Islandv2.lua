@@ -1713,6 +1713,87 @@ spawn(function()
       end
    end
 end)
+spawn(function()
+   while getgenv().AutoSuperHuman and wait() do
+      local BlackLeg = game.Players.LocalPlayer.Backpack:FindFirstChild("Black Leg") or game.Players.LocalPlayer.Character:FindFirstChild("Black Leg")
+      if not BlackLeg then
+         local args = {
+            [1] = "BuyBlackLeg"
+         }
+         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+      end
+      wait(1)
+      if BlackLeg then
+         if BlackLeg.Level.Value <= 299 then
+            Weapon = BlackLeg
+            repeat wait() until BlackLeg.Level.Value >= 300 or not getgenv().AutoSuperHuman
+         end
+      end
+
+      local Electro = game.Players.LocalPlayer.Backpack:FindFirstChild("Electro") or game.Players.LocalPlayer.Character:FindFirstChild("Electro")
+      if not Electro then
+         local args = {
+            [1] = "BuyElectro"
+         }
+         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+      end
+      wait(1)
+      if Electro then
+         if Electro.Level.Value <= 299 then
+            Weapon = Electro
+            repeat wait() until Electro.Level.Value >= 300 or not getgenv().AutoSuperHuman
+         end
+      end
+
+      local FishmanKarate = game.Players.LocalPlayer.Backpack:FindFirstChild("FishmanKarate") or game.Players.LocalPlayer.Character:FindFirstChild("FishmanKarate")
+      if not FishmanKarate then
+         local args = {
+            [1] = "BuyFishmanKarate"
+         }
+         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+      end
+      wait(1)
+      if FishmanKarate then
+         if FishmanKarate.Level.Value <= 299 then
+            Weapon = FishmanKarate
+            repeat wait() until FishmanKarate.Level.Value >= 300 or not getgenv().AutoSuperHuman
+         end
+      end
+
+      local DragonClaw = game.Players.LocalPlayer.Backpack:FindFirstChild("DragonClaw") or game.Players.LocalPlayer.Character:FindFirstChild("DragonClaw")
+      if not DragonClaw then
+         local args = {
+            [1] = "BlackbeardReward",
+            [2] = "DragonClaw",
+            [3] = "1"
+         }
+         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+         local args = {
+            [1] = "BlackbeardReward",
+            [2] = "DragonClaw",
+            [3] = "2"
+         }
+         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args)) 
+      end
+      wait(1)
+      if DragonClaw then
+         if DragonClaw.Level.Value <= 299 then
+            Weapon = v
+            repeat wait() until DragonClaw.Level.Value >= 300 or not getgenv().AutoSuperHuman
+         end
+      end
+
+      local args = {
+         [1] = "BuySuperhuman"
+      }
+      game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+      Superhuman = game.Players.LocalPlayer.Backpack:FindFirstChild("Superhuman") or game.Players.LocalPlayer.Character:FindFirstChild("Superhuman")
+      if Superhuman then
+         Weapon = Superhuman
+         return getgenv().AutoSuperHuman == false and lib:Notify("Auto SuperHuman","Done Auto SuperHuman")
+      end
+   end
+end)
 for i,v in pairs(LP.Backpack:GetChildren()) do  
    if v:IsA("Tool") then
        table.insert(PLrWeapons ,v.Name)
@@ -2900,85 +2981,6 @@ AutoWeapon:addButton("Refresh Weapon Dropdown",function()
 end)
 AutoWeapon:addToggle("Auto SuperHuman",getgenv().AutoSuperHuman,function(boolen)
    getgenv().AutoSuperHuman = boolen
-   while getgenv().AutoSuperHuman and wait() do
-      local BlackLeg = game.Players.LocalPlayer.Backpack:FindFirstChild("Black Leg") or game.Players.LocalPlayer.Character:FindFirstChild("Black Leg")
-      if not BlackLeg then
-         local args = {
-            [1] = "BuyBlackLeg"
-         }
-         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-      end
-      wait(1)
-      if BlackLeg then
-         if BlackLeg.Level.Value <= 299 then
-            Weapon = BlackLeg
-            repeat wait() until BlackLeg.Level.Value >= 300
-         end
-      end
-
-      local Electro = game.Players.LocalPlayer.Backpack:FindFirstChild("Electro") or game.Players.LocalPlayer.Character:FindFirstChild("Electro")
-      if not Electro then
-         local args = {
-            [1] = "BuyElectro"
-         }
-         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-      end
-      wait(1)
-      if Electro then
-         if Electro.Level.Value <= 299 then
-            Weapon = Electro
-            repeat wait() until Electro.Level.Value >= 300
-         end
-      end
-
-      local FishmanKarate = game.Players.LocalPlayer.Backpack:FindFirstChild("FishmanKarate") or game.Players.LocalPlayer.Character:FindFirstChild("FishmanKarate")
-      if not FishmanKarate then
-         local args = {
-            [1] = "BuyFishmanKarate"
-         }
-         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-      end
-      wait(1)
-      if FishmanKarate then
-         if FishmanKarate.Level.Value <= 299 then
-            Weapon = FishmanKarate
-            repeat wait() until FishmanKarate.Level.Value >= 300
-         end
-      end
-
-      local DragonClaw = game.Players.LocalPlayer.Backpack:FindFirstChild("DragonClaw") or game.Players.LocalPlayer.Character:FindFirstChild("DragonClaw")
-      if not DragonClaw then
-         local args = {
-            [1] = "BlackbeardReward",
-            [2] = "DragonClaw",
-            [3] = "1"
-          }
-          game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-          local args = {
-            [1] = "BlackbeardReward",
-            [2] = "DragonClaw",
-            [3] = "2"
-          }
-          game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args)) 
-      end
-      wait(1)
-      if DragonClaw then
-         if DragonClaw.Level.Value <= 299 then
-            Weapon = v
-            repeat wait() until DragonClaw.Level.Value >= 300
-         end
-      end
-
-      local args = {
-         [1] = "BuySuperhuman"
-      }
-      game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-      Superhuman = game.Players.LocalPlayer.Backpack:FindFirstChild("Superhuman") or game.Players.LocalPlayer.Character:FindFirstChild("Superhuman")
-      if Superhuman then
-         Weapon = Superhuman
-         return getgenv().AutoSuperHuman == false and lib:Notify("Auto SuperHuman","Done Auto SuperHuman")
-      end
-   end
 end)
 AutoWeapon:addToggle("Auto Equip Accessory",false,function(boolen)
    getgenv().AutoAccessory = boolen
@@ -6382,81 +6384,18 @@ Server = GameServer:addSection("Server")
 Server:addSlider("Server Players",ServerPlayers,1,12,function(Value)
    ServerPlayers = Value
 end)
-Server:addButton("Server Hop(Working?)",function()
-   lib:Notify("Server Hop","Credit to Charwar") 
-   local PlaceID = game.PlaceId
-   local AllIDs = {}
-   local foundAnything = ""
-   local actualHour = os.date("!*t").hour
-   local Deleted = false
-   local File = pcall(function()
-       AllIDs = game:GetService('HttpService'):JSONDecode(readfile("NotSameServers.json"))
-   end)
-   if not File then
-       table.insert(AllIDs, actualHour)
-       writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
-   end
-   function TPReturner()
-       local Site;
-       if foundAnything == "" then
-           Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
-       else
-           Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
-       end
-       local ID = ""
-       if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
-           foundAnything = Site.nextPageCursor
-       end
-       local num = 0;
-       for i,v in pairs(Site.data) do
-           local Possible = true
-           ID = tostring(v.id)
-           if tonumber(v.maxPlayers) > tonumber(v.playing) then
-               for _,Existing in pairs(AllIDs) do
-                   if num ~= 0 then
-                       if ID == tostring(Existing) then
-                           Possible = false
-                       end
-                   else
-                       if tonumber(actualHour) ~= tonumber(Existing) then
-                           local delFile = pcall(function()
-                               delfile("NotSameServers.json")
-                               AllIDs = {}
-                               table.insert(AllIDs, actualHour)
-                           end)
-                       end
-                   end
-                   num = num + 1
-               end
-               if Possible == true then
-                   table.insert(AllIDs, ID)
-                   wait()
-                   pcall(function()
-                       writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
-                       wait()
-                       game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
-                   end)
-                   wait(4)
-               end
-           end
-       end
-   end
-   
-   function Teleport()
-       while wait() do
-           pcall(function()
-               TPReturner()
-               if foundAnything ~= "" then
-                   TPReturner()
-               end
-           end)
-       end
-   end
-   
-   Teleport()
-end)
 Server:addButton("Server Hop(Patched)",function()
-   LowestServer()
+   wait()
+   if game.PlaceId == 1696916806 then
+   game:GetService("TeleportService"):Teleport(2753915549, game:GetService("Players").LocalPlayer)
+
+   else
+   game:GetService("TeleportService"):Teleport(1696916806, game:GetService("Players").LocalPlayer)
+   end
+   queue_on_teleport([[
+   wait(5)
+   game:GetService("TeleportService"):Teleport(2753915549, game:GetService("Players").LocalPlayer)
+   ]])
    lib:Notify("Server Hop","Done Searching : No Server Found") 
 end)
 Server:addButton("Find Lowest Players Server(Patched)",function()
