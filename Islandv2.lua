@@ -1,3 +1,15 @@
+--[[
+   Credit:
+   Fly: Infinity Yield
+   Lowest Server: Amnesia ( Btw but only blox fruit Patched)
+   RTX graphics: Switchblades
+   Fps Boost: e621
+   All Functions below are written by me
+   Have fun skidding
+]]
+
+
+
 --Disable Errors
 --[[if getconnections then
    for _,v in next, getconnections(game:GetService("LogService").MessageOut) do
@@ -9,6 +21,10 @@
    
 end]]
 --Config
+
+--Default Color(Look very good tbh)
+getgenv().TextColorChange = Color3.fromRGB(255, 255, 255)
+getgenv().GlowColorChange = Color3.fromRGB(255, 255, 255)
 --Teleport Section
 getgenv().CtrlTp = false
 getgenv().CtrlTween = false
@@ -62,18 +78,11 @@ filename = "IslandSetting.lua";
 http = game:GetService('HttpService') 
 req =  http_request or request or HttpPost or syn.request -- get request
 Mouse = LP:GetMouse()
-themes = {
-   Background = Color3.fromRGB(15,15,15), 
-   Glow = Color3.fromRGB(255, 255, 255), 
-   Accent = Color3.fromRGB(10, 10, 10), 
-   LightContrast = Color3.fromRGB(20, 20, 20), 
-   DarkContrast = Color3.fromRGB(0.05,0.05,0.05),  
-   TextColor = Color3.fromRGB(255, 255, 255)
-}
 CanTween = true
 MaxLevelSea = 0
 Weapon = ""
 PLrWeapons = {}
+FruitTable = {} 
 SpecialMob = "JustAranDOmString"
 PlayerTable = {}
 HighestLvToFarm =  0
@@ -264,6 +273,7 @@ function Equip(Tool)
       end)
    end)
 end
+
 --For Auto Chest
 function FindNearest(chests)
    local lowestdist = math.huge -- infinity
@@ -1667,6 +1677,15 @@ CamMod:Stop()
 LoadSetting()
 
 --Extra Functions
+
+local args = {[1] = "GetFruits"}
+for i,v in pairs(game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))) do
+   for i2,v2 in pairs(v) do
+      if i2 == "Name" then
+         table.insert(FruitTable, v2)
+      end
+   end
+end
 spawn(function()
    getgenv().Executed = true
    wait(9)
@@ -1940,9 +1959,13 @@ for i,v in pairs(require(game:GetService("ReplicatedStorage").Quests)) do
 end
 --Ui
 loadstring(game:HttpGet("https://raw.githubusercontent.com/vinhuchi/Island_Game/main/version.lua"))()
+lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/vinhuchi/Island_Game/main/venyxUi.lua"))().new("Island v2")
+
 lib:Notify("Island","Ui Made by Denosaur")
 wait(1)
 lib:Notify("Island","Loading Functions + Data")
+lib:setTheme("TextColor",getgenv().TextColorChange)
+lib:setTheme("Glow",getgenv().GlowColorChange)
 
 local MainPage = lib:addPage("Main")
 local AutoFarm = MainPage:addSection("Auto Farm")
@@ -1958,7 +1981,6 @@ AutoFarm:addToggle("Auto Farm",getgenv().AutoFarm,function(boolen)
          
          if Char:FindFirstChild(Weapon) then
             Click()
-            print("Hi")
          else
             Equip(Weapon)
          end
@@ -2948,6 +2970,108 @@ AutoFarmBoss:addToggle("Kill Boss",false,function(boolen)
       end
    end
    RemoveFloat()
+end)
+AutoFarmBoss:addToggle("Auto All Boss",false,function(boolen)
+   getgenv().AutoAllBoss = boolen
+   spawn(function()
+      while getgenv().AutoAllBoss do
+         wait()
+         
+         if Char:FindFirstChild(Weapon) then
+            Click()
+         else
+            Equip(Weapon)
+         end
+      end
+   end)
+   while getgenv().AutoAllBoss do
+      wait()
+      for i,v in pairs(BossesTable) do
+         getgenv().ChosenBoss = v
+         CheckQuestBoss()
+         for i,v in pairs(game.Workspace.Enemies:GetChildren()) do
+            if v.Name == BossName then
+               OldY = v.HumanoidRootPart.Position.Y
+               OldCFrame = v.HumanoidRootPart.CFrame
+               Simulation()
+               FastAttack()
+               --Get Quest
+               if getgenv().AutoFarmQuest and QuestNameBoss then
+                  if Alive() and getgenv().AutoAllBoss and game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false then
+                     if v.Parent and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and  v:FindFirstChild("HumanoidRootPart") ~= nil and getgenv().AutoAllBoss then
+                        DoTween(QuestCFrameBoss,getgenv().TweenSpeedQuest)
+                        CancelQuest()
+                        wait(0.1)
+                        if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position- Vector3.new(QuestCFrameBoss)).magnitude < 50 then
+                           game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", QuestNameBoss, LvQuestBoss)
+                           wait(0.5)
+                        elseif getgenv().AutoFarmQuest and getgenv().AutoAllBoss then 
+                           DoTween(QuestCFrameBoss,getgenv().TweenSpeedQuest)
+                           game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", QuestNameBoss, LvQuestBoss)
+                           wait(0.5)
+                        end
+                     end
+                  end
+               end
+               --Tp To Boss
+               if v.Parent and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and  v:FindFirstChild("HumanoidRootPart") ~= nil and Alive() and getgenv().AutoAllBoss then
+                  DisabledNoClip = true
+                  DoTween(v.HumanoidRootPart.CFrame * CFrame.new(0,20,10),getgenv().TweenSpeedAutoFarm)
+                  DisabledNoClip = false
+               end
+               repeat game:GetService("RunService").RenderStepped:wait()
+                  if Alive() then
+                     TweenFloat()
+                     Simulation()
+                     FastAttack()
+                     HitBoxPlr()
+                     DisabledNoClip = true
+   
+                     if v.Parent and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") ~= nil and Alive() and v:FindFirstChild("Humanoid").Health > 0 and (v.HumanoidRootPart.Position-HumanoidRootPart.Position).magnitude <= 300 then
+   
+                        if game.Players.LocalPlayer.Character.HumanoidRootPart.Position.y >= v.HumanoidRootPart.Position.y then
+                           if v.HumanoidRootPart.Position.Y - OldY >= 0 then
+                              spawn(function()
+                                 wait()
+                                 if getgenv().AutoAllBoss and v.Parent and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") ~= nil then
+                                    if Alive() and v:FindFirstChild("Humanoid").Health > 0 and (v.HumanoidRootPart.Position-HumanoidRootPart.Position).magnitude <= 300 then
+                                       TweenFloat()
+                                       HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 20, 10)
+                                    else
+                                       DoTween(v.HumanoidRootPart.CFrame * CFrame.new(0,20,10),getgenv().TweenSpeedAutoFarm)
+                                    end
+                                 end
+   
+                              end)
+                           else 
+                              wait()
+                              DoTween(v.HumanoidRootPart.CFrame * CFrame.new(0,20,10),getgenv().TweenSpeedAutoFarm)
+                           end
+                        elseif getgenv().AutoAllBoss then
+                           local randomnumber = math.random(1,3)
+                           if randomnumber == 1 then
+                              HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 30)      
+                           elseif randomnumber ==2 then
+                              HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, -30) 
+                           elseif randomnumber ==3 then
+                              HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, -30, 0)
+                           end    
+                        end
+                     
+   
+                     elseif not Tweening and v:FindFirstChild("HumanoidRootPart") ~= nil and v.Parent and v:FindFirstChild("Humanoid") and v:FindFirstChild("Humanoid").Health > 0 and Alive() then  
+                        DoTween(v.HumanoidRootPart.CFrame,getgenv().TweenSpeedAutoFarm)
+                        if v.Parent and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") ~= nil and Alive() and v:FindFirstChild("Humanoid").Health > 0 and (v.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude > 300 then
+                           DoTween(v.HumanoidRootPart.CFrame,getgenv().TweenSpeedAutoFarm)
+                        end
+                     end
+                  else wait(5)
+                  end
+               until not v.Parent or v:FindFirstChild("Humanoid") == nil or v.Humanoid.Health <= 0 or v:FindFirstChild("HumanoidRootPart") == nil or not Alive() or getgenv().AutoAllBoss == false
+            end
+         end
+      end
+   end
 end)
 AutoFarmBoss:addToggle("Silent Aim Boss",false,function(boolen)
    getgenv().SilentAimBoss = boolen
@@ -4342,6 +4466,53 @@ end)
 Fruits:addToggle("Get Fruit:Teleport",getgenv().TeleportFruit,function(boolen)
    getgenv().TeleportFruit = boolen
 end)
+Fruits:addDropdown("Select Auto Buy Devil Fruit In Shop",FruitTable,function(Value) 
+   SelectedFruit = Value
+end)
+DF:addToggle("Auto Buy Devil Fruit In Shop",false,function(Value)
+   AutoBuyFruit = Value
+   if SelectedFruit == "" and AutoBuyFruit then
+      lib:Notify("Auto Buy Devil Fruit In Shop","Pls Select a Fruit")
+   elseif AutoBuyFruit then
+      while wait() and AutoBuyFruit do
+         local args = {
+            [1] = "PurchaseRawFruit",
+            [2] = SelectedFruit
+         }
+         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+      end
+   end	
+end)
+Fruits:addToggle("Auto Store Fruits",false,function(value)
+   AutoStoreFruit = value
+   while AutoStoreFruit do
+      StoredFruit = FruitTable
+      wait(1)
+      local args = {
+         [1] = "getInventoryFruits"
+      }
+      game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+      for i,v in pairs(game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))) do
+         for i2,v2 in pairs(v) do
+            FruitCheck = v2
+            for i3,v3 in pairs(StoredFruit) do
+               if v3 == v2 then
+                  table.remove(StoredFruit,i3)
+               end
+            end
+         end
+         
+      end
+      for i,v in pairs(StoredFruit) do
+      local args = {
+         [1] = "StoreFruit",
+         [2] = v
+      }
+
+      game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+      end
+   end
+end)
 local Stats = lib:addPage("Stats")
 local StatsPlr = Stats:addSection("Stats Player")
 MeleePoint = 1
@@ -5113,24 +5284,57 @@ Pvp:addToggle("Spectate",getgenv().Spec,function(boolen)
 end)
 Pvp:addToggle("HitBox Toggle",false,function(v)
    getgenv().Hitboxv = v
-   while getgenv().Hitboxv do
-      wait()
-      pcall(function()
-         local PlrKill = game.Players:FindFirstChild(SelectedPlayer)
-         if PlrKill ~=nil then
-         PlrToKill = PlrKill.Character
-         end
-         if PlrToKill~= nil then
-            PlrToKill.HumanoidRootPart.Size = Vector3.new(Hitboxi,Hitboxi,Hitboxi)
-         end
-      end)
+   if SelectedPlayer ~= nil then
+      while getgenv().Hitboxv do
+         wait()
+         pcall(function()
+            local PlrKill = game.Players:FindFirstChild(SelectedPlayer)
+            if PlrKill ~=nil then
+            PlrToKill = PlrKill.Character
+            end
+            if PlrToKill~= nil then
+               PlrToKill.HumanoidRootPart.Material = "SmoothPlastic"
+               PlrToKill.HumanoidRootPart.Size = Vector3.new(Hitboxi,Hitboxi,Hitboxi)
+            end
+         end)
+      end
+      if getgenv().Hitboxv == false then
+         PlrToKill.HumanoidRootPart.Size = Vector3.new(2,1,2)
+      end
    end
 end)
 Hitboxi = 10
-Pvp:addSlider("HitBox Extender",10,1,60,function(v)
-   Hitboxi = v
+Pvp:addSlider("HitBox Extender",10,1,60,function(Value)
+   Hitboxi = Value
+end)
+Pvp:addSlider("HitBox Transparency",10,0,10,function(Value)
+   HitboxTransparency = Value / 10
+   if SelectedPlayer ~= nil then
+      local PlrKill = game.Players:FindFirstChild(SelectedPlayer)
+      if PlrKill ~=nil then
+         PlrToKill = PlrKill.Character
+         if PlrToKill~= nil then
+            PlrToKill.HumanoidRootPart.Transparency = HitboxTransparency
+         end
+      end
+   end
+end)
+Pvp:addColorPicker("Hitbox Color",Color3.new(0, 0, 0),function(Value)
+   local ColorHRP = Value
+   if SelectedPlayer ~= nil then
+      local PlrKill = game.Players:FindFirstChild(SelectedPlayer)
+      if PlrKill ~=nil then
+         PlrToKill = PlrKill.Character
+         if PlrToKill~= nil then
+            PlrToKill.HumanoidRootPart.Color = ColorHRP
+         end
+      end
+   end
+end)
+Pvp:addButton("Get Kill Player Quest",function()
+   local args = {[1] = "PlayerHunter"}
+   game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
  end)
-
 local LocalPlayerPage = lib:addPage("Local Player")
 
 local LocalPlayerSection = LocalPlayerPage:addSection("Local Player Functions")
@@ -6370,6 +6574,7 @@ UISetting:addKeybind("Hide UI", Enum.KeyCode.RightControl, function()
 end, function()
 
 end)
+
 for Setting, color in pairs(themes) do -- all in one theme changer, i know, im cool
 	UISetting:addColorPicker(Setting, color, function(color3)
 		lib:setTheme(Setting, color3)
@@ -6507,7 +6712,7 @@ GameSection:addDropdown("RTX mode",RTXmode,function(Value)
 end)
 
 GameSection:addButton("RTX Graphic(Client)",function()
-   lib:Notify("RTX Graphic","Credit To Whoever Made This")
+   lib:Notify("RTX Graphic","Credit To Switchblades")
    if getgenv().mode == "Summer2" then
       local yep = game.Lighting
       local yep2 = Instance.new("Sky")
