@@ -1,7 +1,7 @@
 --[[
    Credit:
    Fly: Infinity Yield
-   Lowest Server: Amnesia ( Btw Patched but only blox fruit )
+   Lowest Server: Amnesia ( Btw Patched but only blox fruit)
    RTX graphics: Switchblades
    Fps Boost: e621
    All Functions below are written by me
@@ -3589,7 +3589,7 @@ if FirstSea then
                   local Shank = game.Workspace.Enemies:FindFirstChild("Saber Expert [Lv. 200] [Boss]")
                   DoTween(Shank.HumanoidRootPart.CFrame*CFrame.new(0, 20, 10),getgenv().TweenSpeedAutoFarm)
 
-                  repeat wait(.1)
+                  repeat game:GetService("RunService").RenderStepped:wait(0.1)
                      if game.Players.LocalPlayer.Character:FindFirstChild(Weapon) == nil then
                         Equip(Weapon)
                      end
@@ -3614,9 +3614,9 @@ if FirstSea then
       end
    end)
    AutoStoryQuest:addToggle("Auto Second Sea",getgenv().AutoSecondSea,function(boolen)
-      local PlrLevel = game.Players.localPlayer.Data.Level.Value
       getgenv().AutoSecondSea = boolen
       while getgenv().AutoSecondSea do
+         local PlrLevel = game.Players.localPlayer.Data.Level.Value
          wait()
          if PlrLevel >= 700 then
             getgenv().AutoFarm = false
@@ -3638,14 +3638,16 @@ if FirstSea then
             
                Equip("Key")
                DoTween(CFrame.new(1347.7124, 37.3751602, -1325.6488),getgenv().TweenSpeedTeleportPlace)
-            
+            end
+            if not KilledIceBoss and UsedKey then
+               
                wait(0.5)
 
                if game.Workspace.Enemies:FindFirstChild("Ice Admiral [Lv. 700] [Boss]") then
                   local IceAdmiral = game.Workspace.Enemies:FindFirstChild("Ice Admiral [Lv. 700] [Boss]")
                   DoTween(IceAdmiral.HumanoidRootPart.CFrame*CFrame.new(0, 20, 10),getgenv().TweenSpeedAutoFarm)
 
-                  repeat wait(.1)
+                  repeat game:GetService("RunService").RenderStepped:wait(0.1)
                      if game.Players.LocalPlayer.Character:FindFirstChild(Weapon) == nil then
                         Equip(Weapon)
                      end
@@ -5738,16 +5740,17 @@ Raid:addButton("Teleport to Raid Room",function()
    end
 end)
 local MiscPage = lib:addPage("Misc")
---[[spawn(function()
+spawn(function()
    while wait(300) do
       local args = {[1] = "ColorsDealer",[2] = "1"}
       local CurrentHaki = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
       if (OldHaki == nil or OldHaki == "") or (OldHaki~=CurrentHaki) then
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/vinhuchi/BloxFruit/main/HakiNotifier.lua"))()
          local args = {[1] = "ColorsDealer",[2] = "1"}
          OldHaki =  game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
       end
    end
-end)]]
+end)
 local PlayerTeam = MiscPage:addSection("Player Team")
 PlayerTeam:addButton("Pirates Team",function()
    local args = {[1] = "SetTeam",[2] = "Pirates"}
@@ -6586,10 +6589,10 @@ end)
 local GameServer = lib:addPage("Game-SV")
 Server = GameServer:addSection("Server")
 
-Server:addSlider("Server Players",ServerPlayers,1,12,function(Value)
+Server:addSlider("Server Players(Cannot select because patched)",ServerPlayers,1,12,function(Value)
    ServerPlayers = Value
 end)
-Server:addButton("Server Hop(Patched)",function()
+Server:addButton("Server Hop(Working usually wait 15s to process 2 tps)",function()
    wait()
    if game.PlaceId == 1696916806 then
    game:GetService("TeleportService"):Teleport(2753915549, game:GetService("Players").LocalPlayer)
@@ -6598,10 +6601,13 @@ Server:addButton("Server Hop(Patched)",function()
    game:GetService("TeleportService"):Teleport(1696916806, game:GetService("Players").LocalPlayer)
    end
    queue_on_teleport([[
+  
+
+   repeat wait()
+   until game:IsLoaded()
    wait(5)
    game:GetService("TeleportService"):Teleport(2753915549, game:GetService("Players").LocalPlayer)
    ]])
-   lib:Notify("Server Hop","Done Searching : No Server Found") 
 end)
 Server:addButton("Find Lowest Players Server(Patched)",function()
 
