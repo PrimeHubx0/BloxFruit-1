@@ -1,7 +1,7 @@
 --[[
    Credit:
    Fly: Infinity Yield
-   Lowest Server: Amnesia ( Btw Patched but only blox fruit)
+   Lowest Server: Amnesia (  Patched)
    RTX graphics: Switchblades
    Fps Boost: e621
    All Functions below are written by me
