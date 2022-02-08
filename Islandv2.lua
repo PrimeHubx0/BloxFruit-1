@@ -1673,6 +1673,7 @@ mt.__index = newcclosure(function(t, k)
     return oldindex(t, k)
 end)
 setreadonly(mt, true)
+
 CamMod:Stop()
 LoadSetting()
 
@@ -5007,6 +5008,7 @@ Pvp:addToggle("Kill Player(Melee)",false,function(boolen)
          PlrToKillMelee = PlrKillMelee.Character
          if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - PlrToKillMelee.HumanoidRootPart.Position).magnitude < 500 then
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = PlrToKillMelee.HumanoidRootPart.CFrame * CFrame.new(0,30,0)
+            PlrToKillMelee.HumanoidRootPart.Size = Vector3.new(30,30,30)
             FastAttack()
             Click()
             else lib:Notify("Kill Player(Melee)","You are too far from Enemy") return
@@ -5042,7 +5044,7 @@ Pvp:addToggle("Kill Player(Gun,Tween,Slow)",false,function(boolen)
          if PlrKillGunTween and PlrKillGunTween.Character and Humanoid and Hum and Humanoid.Health > 0 and PlrKillGunTween then
             TweenFloat()
             Equip(CurrentGun)
-            Hum.Size = Vector3.new(60,60,60)
+            Hum.Size = Vector3.new(70,70,70)
             if (Hum.Position-HumanoidRootPart.Position).magnitude >= 800 then
                spawn(function()
                   wait(0.1)
@@ -5054,6 +5056,7 @@ Pvp:addToggle("Kill Player(Gun,Tween,Slow)",false,function(boolen)
                spawn(function()
                   if Hum and Humanoid.Health > 0 then
                      local RandomThing = math.random(1,4)
+                     TweenFloat()
                      if RandomThing == 1 then
                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Hum.CFrame * CFrame.new(0,80,-10)
                      elseif RandomThing == 2 then
@@ -5085,7 +5088,101 @@ Pvp:addToggle("Kill Player(Gun,Tween,Slow)",false,function(boolen)
    end
    RemoveFloat()
 end)
+Pvp:addToggle("Kill Player(Gun, Teleport(Close Range),High, Stay At 1 Spot)",false,function(bool)
+   KillPlayerGunTeleport = bool
+   if KillPlayerGunTeleport and (SelectedPlayer == "" or SelectedPlayer == nil) then
+      return false
+   end
+   while KillPlayerGunTeleport do
+      wait()
+      local PlrKillGunTp = game.Players:FindFirstChild(SelectedPlayer)
+      if PlrKillGunTp ~=nil then
+         PlrToKillGunTp = PlrKillGunTp.Character
+         if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - PlrToKillGunTp.HumanoidRootPart.Position).magnitude < 500 then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = PlrToKillGunTp.HumanoidRootPart.CFrame * CFrame.new(0,30,0)
+            PlrToKillGunTp.HumanoidRootPart.Size = Vector3.new(70,70,70)
+            FastAttack()
+            Click()
+            repeat wait()
+               spawn(function()
+                  if PlrToKillGunTp:FindFirstChild("HumanoidRootPart") ~= nil then
+                     TweenFloat()
+                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = PlrToKillGunTp.HumanoidRootPart.CFrame * CFrame.new(30, 85, 0)
+                  end
+               end)
+            until not KillPlayerGunTeleport or not PlrToKillGunTp:FindFirstChild("Humanoid") or  PlrToKillGunTp.Humanoid.Health < 0
+            else lib:Notify("Kill Player(Gun TP)","You are too far from Enemy") return
+         end
+      end
+   end
+   local PlrKillGunTp = game.Players:FindFirstChild(SelectedPlayer)
+   if PlrKillGunTp ~=nil and KillPlayerGunTeleport == false then
+      PlrToKillGunTp = PlrKillGunTp.Character
+      if PlrToKillGunTp then
+         PlrToKillGunTp.HumanoidRootPart.Size = Vector3.new(2,1,2)
+      end
+   end
+end)
+Pvp:addToggle("Kill Player(Gun,Insta TP,God Mode Required)",false,function(boolen)
+   KillPlayerGunInstaTp = boolen
+   if KillPlayerGunInstaTp and (SelectedPlayer == "" or SelectedPlayer == nil) then
+      return false
+   end
+   for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do  
+      if v:IsA("Tool") then
+         if v:FindFirstChild("RemoteFunctionShoot") then 
+            CurrentGun = v.Name
+         end
+      end
+   end
+   for i,v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do  
+      if v:IsA("Tool") then
+         if v:FindFirstChild("RemoteFunctionShoot") then 
+            CurrentGun = v.Name
+         end
+      end
+   end
+   while KillPlayerGunInstaTp and game:GetService("RunService").RenderStepped:wait() do
+      local PlrKillGunInstaTp = game.Players:FindFirstChild(SelectedPlayer)
+      if PlrKillGunInstaTp ~=nil then 
+         local Humanoid = PlrKillGunInstaTp.Character:FindFirstChild("Humanoid")
+         local Hum = PlrKillGunInstaTp.Character:FindFirstChild("HumanoidRootPart")
+         if PlrKillGunInstaTp and PlrKillGunInstaTp.Character and Humanoid and Hum and Humanoid.Health > 0 and PlrKillGunInstaTp then
+            TweenFloat()
+            Equip(CurrentGun)
+            Hum.Size = Vector3.new(60,60,60)
+            --Thread 1
 
+            --Thread 2 
+            spawn(function()
+               if Hum and Humanoid.Health > 0 then
+                  local RandomThing = math.random(1,2)
+                  if RandomThing == 1 then
+                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Hum.CFrame * CFrame.new(0,10,-20)
+                  else
+                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Hum.CFrame * CFrame.new(0,10,20)
+                  end
+               end
+            end)
+            --Thread 3
+            spawn(function()
+               if game.Players.LocalPlayer.Character:FindFirstChild(CurrentGun)  then
+                  if PlrKillGunInstaTp.Character then
+                     if PlrKillGunInstaTp.Character.HumanoidRootPart then
+                        local args = {
+                           [1] = PlrKillGunInstaTp.Character.HumanoidRootPart.Position,
+                           [2] = PlrKillGunInstaTp.Character.HumanoidRootPart
+                        }
+                        game:GetService("Players").LocalPlayer.Character[CurrentGun].RemoteFunctionShoot:InvokeServer(unpack(args))
+                     end
+                  end
+               end
+            end)
+         end
+      end
+   end
+   RemoveFloat()
+end)
 Pvp:addToggle("Kill Player v2",false,function(boolen)
    
    KillPlayerV2 = boolen
@@ -5106,6 +5203,7 @@ Pvp:addToggle("Kill Player v2",false,function(boolen)
       while KillPlayerV2 do
          wait()
          pcall(function()
+            TweenFloat()
             ClickMod.activeController.hitboxMagnitude = 80 
          end)
       end
