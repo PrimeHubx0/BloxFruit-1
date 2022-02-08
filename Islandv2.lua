@@ -5741,6 +5741,7 @@ Raid:addButton("Teleport to Raid Room",function()
 end)
 local MiscPage = lib:addPage("Misc")
 spawn(function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/vinhuchi/BloxFruit/main/HakiNotifier.lua"))()
    while wait(300) do
       local args = {[1] = "ColorsDealer",[2] = "1"}
       local CurrentHaki = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
